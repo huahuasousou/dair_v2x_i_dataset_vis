@@ -15,6 +15,7 @@ class KittiDetectionDataset:
             self.label_path = label_path
 
         self.all_ids = os.listdir(self.velo_path)
+        
 
     def __len__(self):
         return len(self.all_ids)
