@@ -11,11 +11,10 @@ return: P2: (4,4) 3D camera coordinates to 2D image pixels
 """
 def read_calib(calib_path):
 
-
-
     K11=np.array((9.837163130824076e+02,0,0,\
         0,8.595545273466768e+02,0,\
         9.404020659139954e+02,5.756271947729268e+02,1),np.float32)
+
 
     K11=K11.reshape((3,3)).T
     K11= np.insert(K11, 3, values=0, axis=1)
@@ -27,27 +26,18 @@ def read_calib(calib_path):
                 -0.4095134968418579, -0.0169787561689188, -0.9121460506647551, -1.2267393975465035,\
                 0.9011842751776943, 0.14810056923444437, -0.4073488966044802, 0.12756363884073307,\
                 0, 0, 0, 1),np.float32)
-    P11=P11.reshape((4,4))
-
-    print("P11:",P11)
-    """
-    P2 = re.split(" ", line.strip())
-    P2 = np.array(P2[-12:], np.float32)
-    P2 = P2.reshape((3, 4))
-if line[:14] == "Tr_velo_to_cam" or line[:11] == "Tr_velo_cam":
-    vtc_mat = re.split(" ", line.strip())
-    vtc_mat = np.array(vtc_mat[-12:], np.float32)
-    vtc_mat = vtc_mat.reshape((3, 4))
-    vtc_mat = np.concatenate([vtc_mat, [[0, 0, 0, 1]]])
-if line[:7] == "R0_rect" or line[:6] == "R_rect":
-    R0 = re.split(" ", line.strip())
-    R0 = np.array(R0[-9:], np.float32)
-    R0 = R0.reshape((3, 3))
-    R0 = np.concatenate([R0, [[0], [0], [0]]], -1)
-    R0 = np.concatenate([R0, [[0, 0, 0, 1]]])
-vtc_mat = np.matmul(R0, vtc_mat)                
     
-    """
+    P11=P11.reshape((4,4))
+    #P11[0:3,0:3]=P11[0:3,0:3].T
+    
+    print("P11:",P11)
+
+    test_P=np.array([9.9613460808857857e-01,-8.4555111027209293e-02,-2.3796549484966172e-02,5.2099604408767163e+03,\
+                -4.4009003785814141e-02,-2.4595980581401863e-01,-9.6828042503693657e-01,-2.6677084559796695e+04,\
+                7.6020064154105588e-02,9.6558490415038412e-01,-2.4873026097139672e-01,9.3040370481562015e+04,\
+                0, 0, 0, 1])
+
+    test_P=np.reshape(test_P, [4, 4])
 
     return (K11, P11)
 
@@ -67,7 +57,8 @@ def load_pcd_velo(velo_filename, n_vec=4):
 def read_velodyne(path, P, vtc_mat,IfReduce=True):
     max_row = 1080  # y
     max_col = 1920  # x
-    lidar = np.fromfile(path, dtype=np.float32).reshape((-1, 4))
+    lidar=load_pcd_velo(path)
+    #lidar = np.fromfile(path, dtype=np.float32).reshape((-1, 4))
     print("lidar:",lidar)
     if not IfReduce:
         return lidar

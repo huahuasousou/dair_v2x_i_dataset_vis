@@ -17,9 +17,9 @@ def ips_viewer(ipu,cam,lidar_com):
     for i in range(len(dataset)):
         P2, V2C, points, image, labels, label_names = dataset[i]
 
-        mask = label_names=="Car"
+        mask = label_names=="Minibus"  #只显示Car
         labels = labels[mask]
-        label_names = label_names[mask]
+        label_names = label_names[mask]#感觉显示lidar有问题，lidar没转换或者转换错了，否则不可能box和lidar对不上
 
         vi.add_points(points[:,:3],scatter_filed=points[:,2],color_map_name='viridis')
         vi.add_3D_boxes(labels,box_info=label_names)

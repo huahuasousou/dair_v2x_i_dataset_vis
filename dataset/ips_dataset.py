@@ -92,8 +92,8 @@ class IPS300DetectionDataset:
         label_path = os.path.join(self.label_path, name+self.label_name)
 
         P2,V2C = read_calib(calib_path)#仅实现ipu1cam1
-        points = read_velodyne(velo_path,P2,V2C)#未实现，修改
-        image = read_image(image_path)
+        points = read_velodyne(velo_path,P2,V2C)
+        image = read_image(image_path)#仅支持去畸变后图像
         labels,label_names = read_detection_label(label_path)
         labels[:,3:6] = cam_to_velo(labels[:,3:6],V2C)[:,:3]
 
