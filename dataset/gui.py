@@ -8,15 +8,47 @@ import cv2
 class setting_windows:
     def __init__(self,window_name):
         self.window_name=window_name
+        self.roll_degree=0
         self.pitch_degree=0
         self.yaw_degree=0
+        self.vect_x=500
+        self.vect_y=500
+        self.vect_z=500
+
+        self.T=np.array((0,0,0),np.float32) 
+        self.T=self.T.reshape((3,1))
+
+        self.R=np.array((0,0,0,0,0,0,0,0,0),np.float32) 
+        self.R=self.R.reshape((3,3))        
+        self.P=np.array((0.14200562691952617, -0.9888265486076867, -0.045348193919961095, 1.0285320021923907,\
+                    -0.4095134968418579, -0.0169787561689188, -0.9121460506647551, -1.2267393975465035,\
+                    0.9011842751776943, 0.14810056923444437, -0.4073488966044802, 0.12756363884073307,     #-z    
+                    0, 0, 0, 1),np.float32)
+        self.P=self.P.reshape((4,4))
 
         cv2.namedWindow(self.window_name)
-        #定义回调函数
-        cv2.createTrackbar('X-roll (degree)',self.window_name,0,360,self.ax)
-        #cv2.createTrackbar('Y-pitch (degree)',self.window_name,100,400,self.ay)
-        #cv2.createTrackbar('Z-yaw (degree)',self.window_name,100,400,self.az)        
 
+        #设定各滑块
+        cv2.createTrackbar('X-roll (degree)',self.window_name,0,360,self.ax)
+        cv2.createTrackbar('Y-pitch (degree)',self.window_name,0,360,self.ay)
+        cv2.createTrackbar('Z-yaw (degree)',self.window_name,0,360,self.az)
+        cv2.createTrackbar('X-vect (m)',self.window_name,0,1000,self.vx)
+        cv2.createTrackbar('Y-vect (m)',self.window_name,0,1000,self.vy)
+        cv2.createTrackbar('Z-vect (m)',self.window_name,0,1000,self.vz)
+        #设定初始值，init函数可以读取文件到self中，这样可以自动加载
+        cv2.setTrackbarPos('X-roll (degree)',self.window_name, self.roll_degree)
+        cv2.setTrackbarPos('Y-pitch (degree)',self.window_name,self.pitch_degree)
+        cv2.setTrackbarPos('Z-yaw (degree)',self.window_name,self.yaw_degree)
+        cv2.setTrackbarPos('X-vect (m)',self.window_name,self.vect_x)
+        cv2.setTrackbarPos('Y-vect (m)',self.window_name,self.vect_y)
+        cv2.setTrackbarPos('Z-vect (m)',self.window_name,self.vect_z)  
+                
+    def update_matrix(self):
+        self.R=eulerAnglesToRotationMatrix([math.radians(self.roll_degree),math.radians(self.pitch_degree),math.radians(self.yaw_degree)])
+        self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
+        self.P[0:3,0:3]=self.R
+        self.P[0:3,3]=self.T
+        print(self.P)
     def show_windows(self):
         while(1):
             #返回滑动条所在位置的值
@@ -25,9 +57,30 @@ class setting_windows:
             #Canny边缘检测
             if cv2.waitKey(1)==ord('q'):
                 break
-    def ax(self,x):#在class中别忘了self传入
-        self.roll_degree=x
-        print("self.roll_degree: ",self.roll_degree)
+    def ax(self,input_value):#在class中别忘了self传入
+        self.roll_degree=input_value
+        self.update_matrix()
+
+    def ay(self,input_value):#在class中别忘了self传入
+        self.pitch_degree=input_value
+        self.update_matrix()
+
+    def az(self,input_value):#在class中别忘了self传入
+        self.yaw_degree=input_value
+        self.update_matrix()
+    def vx(self,input_value):#在class中别忘了self传入
+        self.vect_x=input_value
+        self.update_matrix()
+
+
+    def vy(self,input_value):#在class中别忘了self传入
+        self.vect_y=input_value
+        self.update_matrix()
+
+
+    def vz(self,input_value):#在class中别忘了self传入
+        self.vect_z=input_value
+        self.update_matrix()
 
     def read_config(self):
         pass
