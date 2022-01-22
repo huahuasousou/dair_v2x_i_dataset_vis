@@ -11,7 +11,7 @@ def convert_box_type(boxes,input_box_type = 'Kitti'):
     boxes = np.array(boxes)
     if len(boxes) == 0:
         return None
-    assert  input_box_type in ["Kitti","OpenPCDet","Waymo"], 'unsupported input box type!'
+    assert  input_box_type in ["Kitti","OpenPCDet","Waymo","IPS300"], 'unsupported input box type!'
 
     if input_box_type in ["OpenPCDet","Waymo"]:
         return boxes
@@ -28,9 +28,22 @@ def convert_box_type(boxes,input_box_type = 'Kitti'):
         new_boxes[:, 2] += boxes[:, 0] / 2
         return new_boxes
 
+    elif input_box_type == "IPS300": #(h,w,l,x,y,z,yaw) -> (x,y,z,l,w,h,yaw)
+        boxes = np.array(boxes)
+        new_boxes = np.zeros(shape=boxes.shape)
+        new_boxes[:,:]=boxes[:,:]
+        new_boxes[:,0:3] = boxes[:,3:6]#XYZ->
+        new_boxes[:, 3] = boxes[:, 2]#L
+        new_boxes[:, 4] = boxes[:, 1]#W
+        new_boxes[:, 5] = boxes[:, 0]#H
+        new_boxes[:, 6] =  boxes[:, 6]  #yaw->        ips数据集这里不需要变换
+        new_boxes[:, 2] -= 2*boxes[:, 0]#new.z-=2*old.h,这是fix label后的
+        return new_boxes
+
+
 def get_mesh_boxes(boxes,colors="red",
-                   mesh_alpha=0.4,
-                   ids=None,
+                   mesh_alpha=0.4,#透明度
+                   ids=None,#每个盒子的ID
                    show_ids=False,
                    box_info=None,
                    show_box_info=False,
@@ -78,7 +91,7 @@ def get_mesh_boxes(boxes,colors="red",
 
         vtk_boxes_list.append(vtk_box)
 
-    return vtk_boxes_list
+    return vtk_boxes_list#返回vtk格式的box list
 
 
 def get_line_boxes(boxes,
@@ -217,14 +230,17 @@ def get_box_points(points, pose=None):
     point=np.zeros(shape=points.shape)
     point[:]=points[:]
 
-    h,w,l = point[5],point[4],point[3]
+    h,w,l = point[5],point[4],point[3]#这里调整2d图像里的顺序
     x,y,z = point[0],point[1],point[2]
+    #h,w,l = point[5],point[4],point[3]#这里调整2d图像里的顺序
+    #x,y,z = point[0],point[1],point[2]
 
 
     point_num=200
     i=1
     label=1
     z_vector = np.arange(- h / 2, h / 2, h / point_num)[0:point_num]
+
     w_vector = np.arange(- w / 2, w / 2, w / point_num)[0:point_num]
     l_vector = np.arange(- l / 2, l / 2, l / point_num)[0:point_num]
 
@@ -323,17 +339,17 @@ def get_box_points(points, pose=None):
     l4[:, 2] = h / 2
     l4[:, 3] = i
 
-    point_mat=np.mat(np.concatenate((z1,z2,z3,z4,w1,w2,w3,w4,l1,l2,l3,l4,d1,d2,d3,d4)))#
+    point_mat=np.mat(np.concatenate((z1,z2,z3,z4,w1,w2,w3,w4,l1,l2,l3,l4,d1,d2,d3,d4)))#都是长宽高应该没问题，主要问题在于外参6变换
 
-    angle=point[6]-PI/2
-
-    if pose is None:
-        convert_mat = np.mat([[math.cos(angle), -math.sin(angle), 0, x],
+    angle=point[6]-PI/2 #这里为什么要减去？不过这个只是影响朝向，不会影响投影结果，暂时跳过
+    #angle=0#暂时测试,这里怎么调节好像都对3d没关系,这里只对2D有影响
+    if pose is None:#没有给出pose，则进入，绕z轴旋转
+        convert_mat = np.mat([[math.cos(angle), -math.sin(angle), 0, x],#旋转角度转为R旋转矩阵
                               [math.sin(angle), math.cos(angle), 0, y],
                               [0, 0, 1, z],
                               [0, 0, 0, label]])
 
-        transformed_mat = convert_mat * point_mat.T
+        transformed_mat = convert_mat * point_mat.T#转制列，让所有点可以得到运算
     else:
 
         convert_mat = np.mat([[math.cos(angle), -math.sin(angle), 0, 0],
@@ -348,7 +364,8 @@ def get_box_points(points, pose=None):
         transformed_mat = pose_mat * transformed_mat
 
 
-    transformed_mat = np.array(transformed_mat.T,dtype=np.float32)
+    transformed_mat = np.array(transformed_mat.T,dtype=np.float32)#最后转制回来，输出box在lidar坐标系下面的3d坐标，只不过添加了朝向
+                                #此时还没有转为3d相机和2d图像坐标系，这里不会出问题，即使出问题也是朝向问题，暂时跳过
 
     return transformed_mat
 
@@ -358,10 +375,10 @@ def velo_to_cam(cloud,vtc_mat):
     input: (PointsNum,3)
     output: (PointsNum,3)
     """
-    mat=np.ones(shape=(cloud.shape[0],4),dtype=np.float32)
-    mat[:,0:3]=cloud[:,0:3]
-    mat=np.mat(mat)
-    normal=np.mat(vtc_mat)
-    transformed_mat = normal * mat.T
-    T=np.array(transformed_mat.T,dtype=np.float32)
+    mat=np.ones(shape=(cloud.shape[0],4),dtype=np.float32)#新建一个和输入一致的全为1的，只不过shape为4
+    mat[:,0:3]=cloud[:,0:3]#赋值拷贝一份，相当与扩充为4.P.S.为什么不直接输入原始4shape的呢？
+    mat=np.mat(mat)#将mat从array转为matrix
+    normal=np.mat(vtc_mat)#将外参从array转为matrix 4X4赋值给normal
+    transformed_mat = normal * mat.T#转制后可以批量运算，和外参运算
+    T=np.array(transformed_mat.T,dtype=np.float32)#再转制回来，输出
     return T

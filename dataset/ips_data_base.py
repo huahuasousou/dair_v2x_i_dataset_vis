@@ -19,25 +19,14 @@ def read_calib(calib_path):
     K11=K11.reshape((3,3)).T
     K11= np.insert(K11, 3, values=0, axis=1)
     K11= np.insert(K11, 3, values=0, axis=0)    
-    print("K11:",K11)
-
 
     P11=np.array((0.14200562691952617, -0.9888265486076867, -0.045348193919961095, 1.0285320021923907,\
                 -0.4095134968418579, -0.0169787561689188, -0.9121460506647551, -1.2267393975465035,\
-                0.9011842751776943, 0.14810056923444437, -0.4073488966044802, 0.12756363884073307,\
+                0.9011842751776943, 0.14810056923444437, -0.4073488966044802, 0.12756363884073307,     #-z    
                 0, 0, 0, 1),np.float32)
     
     P11=P11.reshape((4,4))
     #P11[0:3,0:3]=P11[0:3,0:3].T
-    
-    print("P11:",P11)
-
-    test_P=np.array([9.9613460808857857e-01,-8.4555111027209293e-02,-2.3796549484966172e-02,5.2099604408767163e+03,\
-                -4.4009003785814141e-02,-2.4595980581401863e-01,-9.6828042503693657e-01,-2.6677084559796695e+04,\
-                7.6020064154105588e-02,9.6558490415038412e-01,-2.4873026097139672e-01,9.3040370481562015e+04,\
-                0, 0, 0, 1])
-
-    test_P=np.reshape(test_P, [4, 4])
 
     return (K11, P11)
 
@@ -59,29 +48,28 @@ def read_velodyne(path, P, vtc_mat,IfReduce=True):
     max_col = 1920  # x
     lidar=load_pcd_velo(path)
     #lidar = np.fromfile(path, dtype=np.float32).reshape((-1, 4))
-    print("lidar:",lidar)
     if not IfReduce:
         return lidar
 
     mask = lidar[:, 0] > 0
     lidar = lidar[mask]
     lidar_copy = np.zeros(shape=lidar.shape)
-    lidar_copy[:, :] = lidar[:, :]
+    lidar_copy[:, :] = lidar[:, :]#读取拷贝一份点云list
 
-    velo_tocam = vtc_mat
-    lidar[:, 3] = 1
-    lidar = np.matmul(lidar, velo_tocam.T)
-    img_pts = np.matmul(lidar, P.T)
-    velo_tocam = np.mat(velo_tocam).I
-    velo_tocam = np.array(velo_tocam)
-    normal = velo_tocam
-    normal = normal[0:3, 0:4]
-    lidar = np.matmul(lidar, normal.T)
-    lidar_copy[:, 0:3] = lidar
-    x, y = img_pts[:, 0] / img_pts[:, 2], img_pts[:, 1] / img_pts[:, 2]
+    velo_tocam = vtc_mat#复制一份外参
+    lidar[:, 3] = 1#点云xyz把强度值设为1，其实应该是为了接下来运算当作系数
+    lidar = np.matmul(lidar, velo_tocam.T)#这里进行了一次运算！变换到3d相机坐标系了！跟住lidar看看去哪儿了
+    img_pts = np.matmul(lidar, P.T)#变换到相机3d坐标系后，可以继续变换到2D图像坐标系了，应该是为了删除无用点云，跟住img_pts看看去哪儿了
+    velo_tocam = np.mat(velo_tocam).I#这里还取逆是为了逆变换，注意T向量也取逆了，这个应该是争取的方式。R和转置效果一样，但是T向量只能取逆。之前的转制不是为了旋转R矩阵，只是为了批量运算
+    velo_tocam = np.array(velo_tocam)#再转为数组
+    normal = velo_tocam#这里又取了一次外参？？？
+    normal = normal[0:3, 0:4]#删掉已经无用的最后一行0,0,0,1
+    lidar = np.matmul(lidar, normal.T)#这里又做了一次逆运算,T是为了批量运算。又回到lidar坐标系了，验证此时数据恢复为最初，和copy一致
+    lidar_copy[:, 0:3] = lidar#这里不明白，xyz重新赋值，最后一列强度值0.2也没有删掉，除了损失精度还有什么意义？
+    x, y = img_pts[:, 0] / img_pts[:, 2], img_pts[:, 1] / img_pts[:, 2]#这个函数里面的2d运算看懂了，是为了取得视角mask，删掉无用点云，不涉及2d图像显示，但是会影响3d视野可见点云
     mask = np.logical_and(np.logical_and(x >= 0, x < max_col), np.logical_and(y >= 0, y < max_row))
-
-    return lidar_copy[mask]
+    #return lidar_copy
+    return lidar_copy[mask]#暂时屏蔽，输出全部点云
 
 
 """

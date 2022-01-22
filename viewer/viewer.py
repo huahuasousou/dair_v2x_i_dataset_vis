@@ -4,7 +4,7 @@ import cv2
 import vtk
 from .color_map import generate_objects_color_map,generate_objects_colors,generate_scatter_colors
 from .box_op import convert_box_type,get_line_boxes,get_mesh_boxes,velo_to_cam,get_box_points
-
+import copy
 class Viewer:
     """
     default box type: "OpenPCDet", (x,y,z,l,w,h,yaw)
@@ -109,17 +109,17 @@ class Viewer:
         :param color_map_name: (str), the name of objects color map, such as "rainbow", "viridis","brg","gnuplot","hsv"
         :return:
         """
-        if scatter_filed is not None:
-            colors = generate_scatter_colors(scatter_filed,color_map_name=color_map_name)
+        if scatter_filed is not None:   #进这里
+            colors = generate_scatter_colors(scatter_filed,color_map_name=color_map_name)#设定rgb颜色
         else:
             colors = color
 
-        if add_to_2D_scene:
-            self.points_info.append((points,colors))
+        if add_to_2D_scene:   #进这里
+            self.points_info.append((points,colors))#添加进队列，xyz和RGB
 
-        if add_to_3D_scene:
-            if del_after_show:
-                self.actors.append(Points(points,r=radius,c=colors,alpha=alpha))
+        if add_to_3D_scene:   #进这里
+            if del_after_show:   #进这里
+                self.actors.append(Points(points,r=radius,c=colors,alpha=alpha))#猜测actors是3d里的point存储list
 
             else:
                 self.actors_without_del.append(Points(points,r=radius,c=colors,alpha=alpha))
@@ -198,21 +198,21 @@ class Viewer:
         """
         if boxes is None:
             return
-        boxes= convert_box_type(boxes,self.box_type)
+        boxes= convert_box_type(boxes,self.box_type)#这里，转换不同数据集xyzwlhangle到统一的顺序
         if boxes is None:
             return
 
         if ids is not None:
             colors = generate_objects_colors(ids,self.objects_color_map)
         else:
-            colors = color
+            colors = color#这里，颜色保持函数传入时的，默认蓝色
 
         if add_to_2D_scene:
-            self.boxes_info.append((boxes,ids,colors,box_info))
+            self.boxes_info.append((boxes,ids,colors,box_info))#把boxes的7个数组和ids不知道是啥，和颜色，和分类添加到统一的boxes_info里
 
         if add_to_3D_scene:
-            if del_after_show:
-                self.actors += get_mesh_boxes(boxes,
+            if del_after_show:#进这里
+                self.actors += get_mesh_boxes(boxes,#返回vtk格式的box list
                                               colors,
                                               mesh_alpha,
                                               ids,
@@ -220,7 +220,7 @@ class Viewer:
                                               box_info,
                                               show_box_info,
                                               caption_size)
-                self.actors += get_line_boxes(boxes,
+                self.actors += get_line_boxes(boxes,#返回vtk格式的线段 list
                                               colors,
                                               show_corner_spheres,
                                               corner_spheres_alpha,
@@ -264,29 +264,29 @@ class Viewer:
 
         if boxes is None:
             return
-        boxes= convert_box_type(boxes,self.box_type)
+        boxes= convert_box_type(boxes,self.box_type)#这里，依旧先转换数据集格式到统一的7位list
         if boxes is None:
             return
 
         if ids is not None:
             colors = generate_objects_colors(ids,self.objects_color_map)
         else:
-            colors = color
+            colors = color#这里，依旧直接使用传入颜色
 
         for i in range(len(boxes)):
-            bb = boxes[i]
+            bb = boxes[i]#临时变量bb，取出boxes的一组数据
 
-            size = bb[3:6]
+            size = bb[3:6]#取whl三个数字
 
-            ang=bb[6]
-            ang = int(ang / (2 * np.pi) * 360)
+            ang=bb[6]#取出角度
+            ang = int(ang / (2 * np.pi) * 360)#转换角度
 
             if type(colors) is str:
-                color = colors
+                color = colors#赋值颜色
             else:
                 color = colors[i]
 
-            if ids is not None:
+            if ids is not None:#不进入
                 ob_id = ids[i]
                 if ob_id in self.tracks_actors_dict.keys():
                     previous_ori=self.tracks_actors_dict[ob_id].GetOrientation()[2]
@@ -347,7 +347,7 @@ class Viewer:
                     else:
                         self.actors_without_del.append(self.tracks_actors_dict[ob_id])
 
-            else:
+            else:#进入这里，添加车辆模型
                 new_car = load(car_model_path)
                 new_car.scale((0.12, 0.3, 0.3))
 
@@ -377,13 +377,16 @@ class Viewer:
                 else:
                     self.actors_without_del.append(new_car)
 
-    def add_image(self,im):
+    def add_image(self,im,deep_copy=False):
         """
         add images for display
         :param im: (array(W,H,3)), image array
         :return:
         """
-        self.image = im
+        if deep_copy==True:
+            self.image = copy.deepcopy(im)
+        else:
+            self.image=im
         return
 
     def show_3D(self):
@@ -392,12 +395,13 @@ class Viewer:
         :param bg_color: (tuple(3,) or list(3,) or str), background color of 3D scene
         :return:
         """
-
-        self.vi.show(self.actors+self.actors_without_del,resetcam=False, camera={'pos': (-10, 0, 5), 'focalPoint': (5, 0, 2), 'viewup': (0, 0, 1)})
+        #self.vi.show(self.actors+self.actors_without_del,axes=1,resetcam=False, camera={'pos': (-10, 0, 5), 'focalPoint': (5, 0, 2), 'viewup': (0, 0, 1)})
+        
+        self.vi.show(self.actors+self.actors_without_del,axes=1,resetcam=True,camera={'pos': (-100, -100, 150), 'focalPoint': (5, 0, 2), 'viewup': (0, 0, 1)})
         self.vi.clear()
-        self.actors.clear()
-        self.points_info.clear()
-        self.boxes_info.clear()
+        #self.actors.clear()
+        #self.points_info.clear()
+        #self.boxes_info.clear()
 
     def show_2D(self,box_color = (255,0,0),show_box_info=False,show_ids=True,points_colors=(0,0,255)):
         """
@@ -412,28 +416,28 @@ class Viewer:
         if (self.cam_extrinsic_mat is None) or (self.cam_intrinsic_mat is None) or (self.image is None):
             return
 
-        H,W,_ = self.image.shape
+        H,W,_ = self.image.shape#这里按图像设置长宽
 
-        for info in self.boxes_info:
-            boxes, ids, colors, box_info=info
+        for info in self.boxes_info:    #将boxes_info中7位+类等list，取出一条给info
+            boxes, ids, colors, box_info=info   #然后将info这一条分别赋值给4个变量方便使用
 
             if boxes is None:
-                continue
+                continue#不进入这里
             elif len(boxes) == 0:
-                continue
+                continue#不进入这里
             else:
-
+                        #下列只是添加bounding box的
                 for box_id in range(len(boxes)):
-                    box = boxes[box_id]
+                    box = boxes[box_id]#boxes是xyz坐标，按顺序取出一个
                     if type(colors) is not str:
-                        color = [colors[box_id][2],colors[box_id][1],colors[box_id][0]]
+                        color = [colors[box_id][2],colors[box_id][1],colors[box_id][0]]#按RGB设置颜色，跳过
                     else:
-                        color = box_color
+                        color = box_color#设置颜色
 
-                    pts_3d_cam = get_box_points(box)
-                    pts_3d_cam = velo_to_cam(pts_3d_cam[:,0:3],self.cam_extrinsic_mat)
+                    pts_3d_cam = get_box_points(box)    #得到bounding box在原始lidar坐标系下，添加了朝向，只会影响朝向暂时跳过排查
+                    pts_3d_cam = velo_to_cam(pts_3d_cam[:,0:3],self.cam_extrinsic_mat)#此时有归一化系数，取前三。继续添加外惨运算，到3d相机坐标系，最大嫌疑在此处
 
-                    img_pts = np.matmul(pts_3d_cam, self.cam_intrinsic_mat.T)  # (N, 3)
+                    img_pts = np.matmul(pts_3d_cam, self.cam_intrinsic_mat.T)  # (N, 3)#运算内参，到图像坐标系，此处没问题，所以最大问题就在这个之前
                     x, y = img_pts[:, 0] / img_pts[:, 2], img_pts[:, 1] / img_pts[:, 2]
 
                     x = np.clip(x, 2, W-2)
@@ -467,26 +471,29 @@ class Viewer:
                         lineType = 4
                         cv2.putText(self.image, text, org, fontFace, fontScale, fontcolor, thickness, lineType)
 
-        for points,colors in self.points_info:
+        if True:
+            #此处添加lidar点云到2D画面
+            for points,colors in self.points_info:
 
-            if type(colors) is tuple:
+                if type(colors) is tuple:
 
-                color = [colors[2],colors[1],colors[0]]
-            else:
-                color = points_colors
+                    color = [colors[2],colors[1],colors[0]]
+                else:
+                    color = points_colors   #设置颜色
 
-            pts_3d_cam = velo_to_cam(points[:, 0:3], self.cam_extrinsic_mat)
+                pts_3d_cam = velo_to_cam(points[:, 0:3], self.cam_extrinsic_mat)
 
-            img_pts = np.matmul(pts_3d_cam, self.cam_intrinsic_mat.T)  # (N, 3)
-            x, y = img_pts[:, 0] / img_pts[:, 2], img_pts[:, 1] / img_pts[:, 2]
+                img_pts = np.matmul(pts_3d_cam, self.cam_intrinsic_mat.T)  # (N, 3)
+                x, y = img_pts[:, 0] / img_pts[:, 2], img_pts[:, 1] / img_pts[:, 2]
 
-            x = np.clip(x, 2, W - 2)
-            y = np.clip(y, 2, H - 2)
+                x = np.clip(x, 2, W - 2)
+                y = np.clip(y, 2, H - 2)
 
-            x = x.astype(np.int)
-            y = y.astype(np.int)
+                x = x.astype(np.int)
+                y = y.astype(np.int)
+                self.image[0,0]=[0,0,0]
 
-            self.image[y, x] = color
+                self.image[y, x] = color
 
         cv2.imshow('im',self.image)
         cv2.waitKey(10)

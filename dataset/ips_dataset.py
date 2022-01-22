@@ -83,7 +83,6 @@ class IPS300DetectionDataset:
         #print("all_ids:",self.all_ids)
         return len(self.all_ids)
     def __getitem__(self, item):
-        print("item:",item)
         name = str(item).zfill(6)
 
         velo_path = os.path.join(self.velo_path,name+self.lidar_name)
@@ -92,9 +91,9 @@ class IPS300DetectionDataset:
         label_path = os.path.join(self.label_path, name+self.label_name)
 
         P2,V2C = read_calib(calib_path)#仅实现ipu1cam1
-        points = read_velodyne(velo_path,P2,V2C)
+        points = read_velodyne(velo_path,P2,V2C)#这里检查过没问题，对点云做了多次运算，为删除视野外点云。
         image = read_image(image_path)#仅支持去畸变后图像
         labels,label_names = read_detection_label(label_path)
-        labels[:,3:6] = cam_to_velo(labels[:,3:6],V2C)[:,:3]
+        #labels[:,3:6] = cam_to_velo(labels[:,3:6],V2C)[:,:3]#这里已经给label做了一次变换了！也许kitti里label是在cam的？所以要转到lidar？注释掉就对了！然后角度还不太对。
 
         return P2,V2C,points,image,labels,label_names
