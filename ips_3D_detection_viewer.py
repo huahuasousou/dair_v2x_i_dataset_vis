@@ -38,13 +38,15 @@ def ips_viewer(ipu,cam,lidar_com):
         if True:    #设置面板
             setting_matrix=setting_windows("setting_windows")
         
-        setting_matrix.show_windows()
+        
         #从这里截断，循环设置外参
         while(True):
+            setting_matrix.show_windows()
+            V2C=setting_matrix.get_matrix()
             vi.add_image(image,deep_copy=True)#只是添加图片，没什么看的
             vi.set_extrinsic_mat(V2C)#设置外参，也没什么看的
 
-            #vi.show_2D()
+            vi.show_2D()
             #vi.show_3D()
 
 

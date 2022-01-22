@@ -42,7 +42,7 @@ class setting_windows:
         cv2.setTrackbarPos('X-vect (m)',self.window_name,self.vect_x)
         cv2.setTrackbarPos('Y-vect (m)',self.window_name,self.vect_y)
         cv2.setTrackbarPos('Z-vect (m)',self.window_name,self.vect_z)  
-                
+
     def update_matrix(self):
         self.R=eulerAnglesToRotationMatrix([math.radians(self.roll_degree),math.radians(self.pitch_degree),math.radians(self.yaw_degree)])
         self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
@@ -50,13 +50,17 @@ class setting_windows:
         self.P[0:3,3]=self.T
         print(self.P)
     def show_windows(self):
-        while(1):
-            #返回滑动条所在位置的值
-            threshold1=cv2.getTrackbarPos('X-roll (degree)',self.window_name)
-            #threshold2=cv2.getTrackbarPos('threshold2',self.window_name)
-            #Canny边缘检测
-            if cv2.waitKey(1)==ord('q'):
-                break
+        #while(1):
+        #返回滑动条所在位置的值
+        threshold1=cv2.getTrackbarPos('X-roll (degree)',self.window_name)
+        #threshold2=cv2.getTrackbarPos('threshold2',self.window_name)
+        #Canny边缘检测
+        #if cv2.waitKey(1)==ord('q'):
+            #break
+    def get_matrix(self):
+        return self.P
+
+
     def ax(self,input_value):#在class中别忘了self传入
         self.roll_degree=input_value
         self.update_matrix()
