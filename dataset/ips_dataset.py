@@ -11,15 +11,16 @@ def get_arg():
     ipu_view=None
     camera_select=None #cam1 or cam2
     lidar_com=None #True select COM data
-
+    start_index=None
  
     argv = sys.argv[1:]
  
     try:
-        opts, args = getopt.getopt(argv, "i:c:l:",  
+        opts, args = getopt.getopt(argv, "i:c:l:s:",  
                                    ["ipu=",
                                     "cam=",
-                                    "lidar="])  # 长选项模式
+                                    "lidar=",
+                                    "start_index="])  # 长选项模式
      
     except:
         print("Error")
@@ -30,10 +31,12 @@ def get_arg():
         elif opt in ['-c', '--cam']:
             camera_select = arg
         elif opt in ['-l', '--lidar']:
-            lidar_com = arg     
+            lidar_com = arg    
+        elif opt in ['-s', '--start_index']:
+            start_index = int(arg)                 
  
 
-    return ipu_view,camera_select,lidar_com
+    return ipu_view,camera_select,lidar_com,start_index
 
 
 class IPS300DetectionDataset:
