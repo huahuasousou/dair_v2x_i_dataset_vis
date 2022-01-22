@@ -377,7 +377,7 @@ class Viewer:
                 else:
                     self.actors_without_del.append(new_car)
 
-    def add_image(self,im,deep_copy=False):
+    def add_image(self,im,deep_copy):
         """
         add images for display
         :param im: (array(W,H,3)), image array
@@ -496,7 +496,7 @@ class Viewer:
                 self.image[y, x] = color
 
         cv2.imshow('im',self.image)
-        cv2.waitKey(10)
-        self.points_info.clear()
-        self.boxes_info.clear()
+        cv2.waitKey(1)
+        #self.points_info.clear()
+        #self.boxes_info.clear()
 
