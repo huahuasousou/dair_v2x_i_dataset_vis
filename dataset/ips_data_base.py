@@ -3,7 +3,7 @@ import cv2
 import re
 import open3d as o3d
 import numpy as np
-
+import json
 """
 input: calib txt path
 return: P2: (4,4) 3D camera coordinates to 2D image pixels
@@ -106,6 +106,33 @@ def read_image(path):
     im=cv2.imdecode(np.fromfile(path, dtype=np.uint8), -1)
     return im
 
+
+
+def read_json_detection_label(path):
+
+    boxes = []
+    names = []
+    line = []
+
+    with open(path) as load_f:
+        load_dict = json.load(load_f)
+        for line in load_dict['objects']:
+            this_name=line['label']
+            if this_name != "DontCare":
+                dimensions=[(line['dimensions']['height'])]+[(line['dimensions']['width'])]+[(line['dimensions']['length'])]
+                center=list((line['center'].values()))
+                rotation_z=[(line['rotation']['z'])]
+                line=dimensions+center+rotation_z
+                line=np.array(line)
+                line=line.astype(np.float32)
+                #line= np.array((" ".join([str(i) for i in line]),np.float32))  #不需要转为空格分割了
+                boxes.append(line)
+                names.append(this_name)
+
+    return np.array(boxes),np.array(names)
+
+
+
 def read_detection_label(path):
 
     boxes = []
@@ -121,6 +148,9 @@ def read_detection_label(path):
                 names.append(this_name)
 
     return np.array(boxes),np.array(names)
+
+
+
 
 def read_tracking_label(path):
 

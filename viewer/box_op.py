@@ -37,7 +37,7 @@ def convert_box_type(boxes,input_box_type = 'Kitti'):
         new_boxes[:, 4] = boxes[:, 1]#W
         new_boxes[:, 5] = boxes[:, 0]#H
         new_boxes[:, 6] =  boxes[:, 6]  #yaw->        ips数据集这里不需要变换
-        #new_boxes[:, 2] -= boxes[:, 0]#new.z-=2*old.h,这是fix label后的
+        #new_boxes[:, 2] -= 0.5*boxes[:, 0]#new.z-=2*old.h,这是fix label后的
         return new_boxes
 
 

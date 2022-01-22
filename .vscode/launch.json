@@ -12,10 +12,9 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": [
-                "-i",
-                "1",
-                "-c",
-                "1"
+                "-i","1",
+                "-c","1",
+                "-s","396"
             ]
         }
     ]

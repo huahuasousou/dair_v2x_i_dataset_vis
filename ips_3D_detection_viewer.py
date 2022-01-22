@@ -7,7 +7,7 @@ from dataset.gui import *
 
 def ips_viewer(ipu,cam,lidar_com,start_index=1):
     root="/home/liuchenghua/IPS300plus_object_vis/data/IPS300+/IPS300+_detection/data"
-    label_path = "/home/liuchenghua/IPS300plus_object_vis/data/IPS300+/IPS300+_detection/label/txt"
+    label_path = "/home/liuchenghua/IPS300plus_object_vis/data/IPS300+/IPS300+_detection/label/json"
     calib_path="/home/liuchenghua/IPS300plus_object_vis/data/IPS300+/IPS300+_detection/calib"
                         
     dataset = IPS300DetectionDataset(root,label_path,calib_path,ipu,cam,lidar_com)
@@ -17,8 +17,8 @@ def ips_viewer(ipu,cam,lidar_com,start_index=1):
     for i in range(start_index,len(dataset)):
         P2, V2C, points, image, labels, label_names = dataset[i]
         #P2, V2C, points, image, labels, label_names = dataset[395]
-        if False:   #是否过滤指定类别
-            mask = label_names=="Minibus"   #只显示Car
+        if True:   #是否过滤指定类别
+            mask = label_names!="pedestrian"  #只显示Car
             labels = labels[mask]           #labels是3dbounding box的7个值
             label_names = label_names[mask] #是bounding box的类别
                                             #point是lidar的点
@@ -44,7 +44,8 @@ def ips_viewer(ipu,cam,lidar_com,start_index=1):
         #while(False):
         setting_matrix.show_windows()
         V2C=setting_matrix.get_matrix()
-        vi.add_image(image,deep_copy=True)#只是添加图片，没什么看的
+        if True:
+            vi.add_image(image,deep_copy=True)#只是添加图片，没什么看的
         vi.set_extrinsic_mat(V2C)#设置外参，也没什么看的
 
         vi.show_2D()

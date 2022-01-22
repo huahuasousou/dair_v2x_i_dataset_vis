@@ -399,9 +399,10 @@ class Viewer:
         
         self.vi.show(self.actors+self.actors_without_del,axes=1,resetcam=True,camera={'pos': (-100, -100, 150), 'focalPoint': (5, 0, 2), 'viewup': (0, 0, 1)})
         self.vi.clear()
-        #self.actors.clear()
-        #self.points_info.clear()
-        #self.boxes_info.clear()
+        if True:
+            self.actors.clear()
+            self.points_info.clear()
+            self.boxes_info.clear()
 
     def show_2D(self,box_color = (255,0,0),show_box_info=False,show_ids=True,points_colors=(0,0,255)):
         """
@@ -497,6 +498,7 @@ class Viewer:
 
         cv2.imshow('im',self.image)
         cv2.waitKey(1)
-        #self.points_info.clear()
-        #self.boxes_info.clear()
+        if True:
+            self.points_info.clear()
+            self.boxes_info.clear()
 
