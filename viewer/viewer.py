@@ -399,7 +399,7 @@ class Viewer:
         
         self.vi.show(self.actors+self.actors_without_del,axes=1,resetcam=True,camera={'pos': (-100, -100, 150), 'focalPoint': (5, 0, 2), 'viewup': (0, 0, 1)})
         self.vi.clear()
-        if True:
+        if False:   #调试外参关闭
             self.actors.clear()
             self.points_info.clear()
             self.boxes_info.clear()
@@ -498,7 +498,7 @@ class Viewer:
 
         cv2.imshow('im',self.image)
         cv2.waitKey(1)
-        if True:
+        if False:   #调试外参关闭
             self.points_info.clear()
             self.boxes_info.clear()
 
