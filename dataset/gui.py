@@ -9,9 +9,11 @@ class setting_windows:
     def __init__(self,window_name,input_matrix):
         self.window_name=window_name
         self.input_matrix=input_matrix
-        self.init_rx,self.init_ry,self.init_rz= rotationMatrixToEulerAngles(self.input_matrix[0:3,0:3])
+        self.input_matrix_inv=inverse_rigid_trans(self.input_matrix)
         
-        self.roll_degree=self.init_rx
+        self.init_rx,self.init_ry,self.init_rz= rotationMatrixToEulerAngles(self.input_matrix_inv[0:3,0:3])
+        
+        self.roll_degree=360+self.init_rx
         self.pitch_degree=360+self.init_ry
         self.yaw_degree=360+self.init_rz
 
@@ -24,9 +26,9 @@ class setting_windows:
         self.vect_z=500+0.12756364*1000/20        
 
         """        
-        self.vect_x=500+self.input_matrix[0,3] *1000/20
-        self.vect_y=500+self.input_matrix[1,3]*1000/20
-        self.vect_z=500+self.input_matrix[2,3]*1000/20
+        self.vect_x=500+self.input_matrix_inv[0,3] *1000/20
+        self.vect_y=500+self.input_matrix_inv[1,3]*1000/20
+        self.vect_z=500+self.input_matrix_inv[2,3]*1000/20
 
         self.T=np.array((0,0,0),np.float32) 
         self.T=self.T.reshape((3,1))
@@ -63,7 +65,7 @@ class setting_windows:
         self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
         self.P[0:3,0:3]=self.R
         self.P[0:3,3]=self.T
-        print(self.P)
+        print(inverse_rigid_trans(self.P))
     def show_windows(self):
         #while(1):
         #返回滑动条所在位置的值
@@ -73,16 +75,16 @@ class setting_windows:
         #if cv2.waitKey(1)==ord('q'):
             #break
     def get_matrix(self):
-        return self.P
+        return inverse_rigid_trans(self.P)
 
     def reset(self,input_value):#在class中别忘了self传入
         if input_value ==1:   
-            self.roll_degree=self.init_rx
+            self.roll_degree=360+self.init_rx
             self.pitch_degree=360+self.init_ry
             self.yaw_degree=360+self.init_rz  
-            self.vect_x=500+self.input_matrix[0,3] *1000/20
-            self.vect_y=500+self.input_matrix[1,3]*1000/20
-            self.vect_z=500+self.input_matrix[2,3]*1000/20
+            self.vect_x=500+self.input_matrix_inv[0,3] *1000/20
+            self.vect_y=500+self.input_matrix_inv[1,3]*1000/20
+            self.vect_z=500+self.input_matrix_inv[2,3]*1000/20
             #设定初始值，init函数可以读取文件到self中，这样可以自动加载
             cv2.setTrackbarPos('X-roll (degree)',self.window_name, int(self.roll_degree))
             cv2.setTrackbarPos('Y-pitch (degree)',self.window_name,int(self.pitch_degree))
@@ -170,5 +172,12 @@ def rotationMatrixToEulerAngles(R) :
     #return np.array([x, y, z])
 
 
-
+def inverse_rigid_trans(Tr):
+    """ Inverse a rigid body transform matrix (3x4 as [R|t])
+        [R'|-R't; 0|1]
+    """
+    inv_Tr = np.zeros_like(Tr)  # 3x4
+    inv_Tr[0:3, 0:3] = np.transpose(Tr[0:3, 0:3])
+    inv_Tr[0:3, 3] = np.dot(-np.transpose(Tr[0:3, 0:3]), Tr[0:3, 3])
+    return inv_Tr
 
