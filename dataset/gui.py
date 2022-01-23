@@ -6,14 +6,27 @@ import cv2
 
 
 class setting_windows:
-    def __init__(self,window_name):
+    def __init__(self,window_name,input_matrix):
         self.window_name=window_name
+        self.input_matrix=input_matrix
+        self.init_rx,self.init_ry,self.init_rz= rotationMatrixToEulerAngles(self.input_matrix[0:3,0:3])
+        
+        self.roll_degree=self.init_rx
+        self.pitch_degree=360+self.init_ry
+        self.yaw_degree=360+self.init_rz
+
+        """
         self.roll_degree=160.02016116  
         self.pitch_degree=360-64.31417419
         self.yaw_degree=360-70.87516021
         self.vect_x=500+1.028532 *1000/20
         self.vect_y=500-1.2267394*1000/20
-        self.vect_z=500+0.12756364*1000/20
+        self.vect_z=500+0.12756364*1000/20        
+
+        """        
+        self.vect_x=500+self.input_matrix[0,3] *1000/20
+        self.vect_y=500+self.input_matrix[1,3]*1000/20
+        self.vect_z=500+self.input_matrix[2,3]*1000/20
 
         self.T=np.array((0,0,0),np.float32) 
         self.T=self.T.reshape((3,1))
@@ -35,6 +48,7 @@ class setting_windows:
         cv2.createTrackbar('X-vect (m)',self.window_name,0,1000,self.vx)
         cv2.createTrackbar('Y-vect (m)',self.window_name,0,1000,self.vy)
         cv2.createTrackbar('Z-vect (m)',self.window_name,0,1000,self.vz)
+        cv2.createTrackbar('Reset',self.window_name,0,1,self.reset)
         #设定初始值，init函数可以读取文件到self中，这样可以自动加载
         cv2.setTrackbarPos('X-roll (degree)',self.window_name, int(self.roll_degree))
         cv2.setTrackbarPos('Y-pitch (degree)',self.window_name,int(self.pitch_degree))
@@ -42,6 +56,7 @@ class setting_windows:
         cv2.setTrackbarPos('X-vect (m)',self.window_name,int(self.vect_x))
         cv2.setTrackbarPos('Y-vect (m)',self.window_name,int(self.vect_y))
         cv2.setTrackbarPos('Z-vect (m)',self.window_name,int(self.vect_z))  
+        cv2.setTrackbarPos('Reset',self.window_name,0)          
 
     def update_matrix(self):
         self.R=eulerAnglesToRotationMatrix([math.radians(self.roll_degree),math.radians(self.pitch_degree),math.radians(self.yaw_degree)])
@@ -60,6 +75,24 @@ class setting_windows:
     def get_matrix(self):
         return self.P
 
+    def reset(self,input_value):#在class中别忘了self传入
+        if input_value ==1:   
+            self.roll_degree=self.init_rx
+            self.pitch_degree=360+self.init_ry
+            self.yaw_degree=360+self.init_rz  
+            self.vect_x=500+self.input_matrix[0,3] *1000/20
+            self.vect_y=500+self.input_matrix[1,3]*1000/20
+            self.vect_z=500+self.input_matrix[2,3]*1000/20
+            #设定初始值，init函数可以读取文件到self中，这样可以自动加载
+            cv2.setTrackbarPos('X-roll (degree)',self.window_name, int(self.roll_degree))
+            cv2.setTrackbarPos('Y-pitch (degree)',self.window_name,int(self.pitch_degree))
+            cv2.setTrackbarPos('Z-yaw (degree)',self.window_name,int(self.yaw_degree))
+            cv2.setTrackbarPos('X-vect (m)',self.window_name,int(self.vect_x))
+            cv2.setTrackbarPos('Y-vect (m)',self.window_name,int(self.vect_y))
+            cv2.setTrackbarPos('Z-vect (m)',self.window_name,int(self.vect_z))  
+            cv2.setTrackbarPos('Reset',self.window_name,0)               
+            #self.update_matrix()
+            #self.reset=0
 
     def ax(self,input_value):#在class中别忘了self传入
         self.roll_degree=input_value
