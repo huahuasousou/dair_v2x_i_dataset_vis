@@ -15,6 +15,13 @@ class setting_windows:
                         0,0,1,0,\
                         0, 0, 0, 1),np.float32)
         self.fix_matrix=self.fix_matrix.reshape((4,4))
+
+        self.temp_matrix=np.array(
+                        (1, 0, 0, 0,\
+                        0,1,0,0,\
+                        0,0,1,0,\
+                        0, 0, 0, 1),np.float32)
+        self.temp_matrix=self.temp_matrix.reshape((4,4))
         self.init_rx,self.init_ry,self.init_rz= rotationMatrixToEulerAngles(self.fix_matrix[0:3,0:3])
         
         self.roll_degree=self.init_rx
@@ -71,6 +78,14 @@ class setting_windows:
         self.P[0:3,3]=self.T
         self.P=np.dot(self.P,self.input_matrix)
         print(self.P)
+
+    def update_single_matrix(self):
+        self.R=eulerAnglesToRotationMatrix([math.radians(self.roll_degree),math.radians(self.pitch_degree),math.radians(self.yaw_degree)])
+        self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
+        self.P[0:3,0:3]=self.R
+        self.P[0:3,3]=self.T
+        self.P=np.dot(self.P,self.input_matrix)
+        print(self.P)
     def show_windows(self):
         #while(1):
         #返回滑动条所在位置的值
@@ -83,6 +98,7 @@ class setting_windows:
         return self.P
 
     def reset(self,input_value):#在class中别忘了self传入
+        """
         if input_value ==1:   
             self.roll_degree=self.init_rx
             self.pitch_degree=360+self.init_ry
@@ -100,31 +116,99 @@ class setting_windows:
             cv2.setTrackbarPos('Reset',self.window_name,0)               
             #self.update_matrix()
             #self.reset=0
+        """
+        self.input_matrix=self.P
 
     def ax(self,input_value):#在class中别忘了self传入
         self.roll_degree=input_value
-        self.update_matrix()
+        self.pitch_degree=0
+        self.yaw_degree=0
+        self.vect_x=0
+        self.vect_y=0
+        self.vect_z=0
+        self.R=eulerAnglesToRotationMatrix([math.radians(self.roll_degree),math.radians(self.pitch_degree),math.radians(self.yaw_degree)])
+        self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
+        self.temp_matrix[0:3,0:3]=self.R
+        self.temp_matrix[0:3,3]=self.T
+        self.P=np.dot(self.temp_matrix,self.input_matrix)
+        print(self.P)
+        #self.update_matrix()
 
     def ay(self,input_value):#在class中别忘了self传入
+        self.roll_degree=0
         self.pitch_degree=input_value
-        self.update_matrix()
+        self.yaw_degree=0
+        self.vect_x=0
+        self.vect_y=0
+        self.vect_z=0
+        self.R=eulerAnglesToRotationMatrix([math.radians(self.roll_degree),math.radians(self.pitch_degree),math.radians(self.yaw_degree)])
+        self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
+        self.temp_matrix[0:3,0:3]=self.R
+        self.temp_matrix[0:3,3]=self.T
+        self.P=np.dot(self.temp_matrix,self.input_matrix)
+        print(self.P)
+        #self.update_matrix()
 
     def az(self,input_value):#在class中别忘了self传入
+        self.roll_degree=0
+        self.pitch_degree=0
         self.yaw_degree=input_value
-        self.update_matrix()
+        self.vect_x=0
+        self.vect_y=0
+        self.vect_z=0
+        self.R=eulerAnglesToRotationMatrix([math.radians(self.roll_degree),math.radians(self.pitch_degree),math.radians(self.yaw_degree)])
+        self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
+        self.temp_matrix[0:3,0:3]=self.R
+        self.temp_matrix[0:3,3]=self.T
+        self.P=np.dot(self.temp_matrix,self.input_matrix)
+        print(self.P)
+        #self.update_matrix()
+
     def vx(self,input_value):#在class中别忘了self传入
+        self.roll_degree=0
+        self.pitch_degree=0
+        self.yaw_degree=0
         self.vect_x=input_value
-        self.update_matrix()
+        self.vect_y=0
+        self.vect_z=0
+        self.R=eulerAnglesToRotationMatrix([math.radians(self.roll_degree),math.radians(self.pitch_degree),math.radians(self.yaw_degree)])
+        self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
+        self.temp_matrix[0:3,0:3]=self.R
+        self.temp_matrix[0:3,3]=self.T
+        self.P=np.dot(self.temp_matrix,self.input_matrix)
+        print(self.P)
+        #self.update_matrix()
 
 
     def vy(self,input_value):#在class中别忘了self传入
+        self.roll_degree=0
+        self.pitch_degree=0
+        self.yaw_degree=0
+        self.vect_x=0
         self.vect_y=input_value
-        self.update_matrix()
-
+        self.vect_z=0
+        self.R=eulerAnglesToRotationMatrix([math.radians(self.roll_degree),math.radians(self.pitch_degree),math.radians(self.yaw_degree)])
+        self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
+        self.temp_matrix[0:3,0:3]=self.R
+        self.temp_matrix[0:3,3]=self.T
+        self.P=np.dot(self.temp_matrix,self.input_matrix)
+        print(self.P)
+        #self.update_matrix()
 
     def vz(self,input_value):#在class中别忘了self传入
+        self.roll_degree=0
+        self.pitch_degree=0
+        self.yaw_degree=0
+        self.vect_x=0
+        self.vect_y=0
         self.vect_z=input_value
-        self.update_matrix()
+        self.R=eulerAnglesToRotationMatrix([math.radians(self.roll_degree),math.radians(self.pitch_degree),math.radians(self.yaw_degree)])
+        self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
+        self.temp_matrix[0:3,0:3]=self.R
+        self.temp_matrix[0:3,3]=self.T
+        self.P=np.dot(self.temp_matrix,self.input_matrix)
+        print(self.P)
+        #self.update_matrix()
 
     def read_config(self):
         pass
