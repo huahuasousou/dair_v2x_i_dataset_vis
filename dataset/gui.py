@@ -9,7 +9,13 @@ class setting_windows:
     def __init__(self,window_name,input_matrix):
         self.window_name=window_name
         self.input_matrix=input_matrix
-        self.init_rx,self.init_ry,self.init_rz= rotationMatrixToEulerAngles(self.input_matrix[0:3,0:3])
+        self.fix_matrix=np.array(
+                        (1, 0, 0, 0,\
+                        0,1,0,0,\
+                        0,0,1,0,\
+                        0, 0, 0, 1),np.float32)
+        self.fix_matrix=self.fix_matrix.reshape((4,4))
+        self.init_rx,self.init_ry,self.init_rz= rotationMatrixToEulerAngles(self.fix_matrix[0:3,0:3])
         
         self.roll_degree=self.init_rx
         self.pitch_degree=360+self.init_ry
@@ -24,9 +30,9 @@ class setting_windows:
         self.vect_z=500+0.12756364*1000/20        
 
         """        
-        self.vect_x=500+self.input_matrix[0,3] *1000/20
-        self.vect_y=500+self.input_matrix[1,3]*1000/20
-        self.vect_z=500+self.input_matrix[2,3]*1000/20
+        self.vect_x=500+self.fix_matrix[0,3] *1000/20
+        self.vect_y=500+self.fix_matrix[1,3]*1000/20
+        self.vect_z=500+self.fix_matrix[2,3]*1000/20
 
         self.T=np.array((0,0,0),np.float32) 
         self.T=self.T.reshape((3,1))
@@ -63,6 +69,7 @@ class setting_windows:
         self.T=(20*(self.vect_x-500)/1000,20*(self.vect_y-500)/1000,20*(self.vect_z-500)/1000)#归一化为+-10米
         self.P[0:3,0:3]=self.R
         self.P[0:3,3]=self.T
+        self.P=np.dot(self.P,self.input_matrix)
         print(self.P)
     def show_windows(self):
         #while(1):
@@ -80,9 +87,9 @@ class setting_windows:
             self.roll_degree=self.init_rx
             self.pitch_degree=360+self.init_ry
             self.yaw_degree=360+self.init_rz  
-            self.vect_x=500+self.input_matrix[0,3] *1000/20
-            self.vect_y=500+self.input_matrix[1,3]*1000/20
-            self.vect_z=500+self.input_matrix[2,3]*1000/20
+            self.vect_x=500+self.fix_matrix[0,3] *1000/20
+            self.vect_y=500+self.fix_matrix[1,3]*1000/20
+            self.vect_z=500+self.fix_matrix[2,3]*1000/20
             #设定初始值，init函数可以读取文件到self中，这样可以自动加载
             cv2.setTrackbarPos('X-roll (degree)',self.window_name, int(self.roll_degree))
             cv2.setTrackbarPos('Y-pitch (degree)',self.window_name,int(self.pitch_degree))
