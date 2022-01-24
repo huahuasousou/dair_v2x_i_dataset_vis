@@ -480,23 +480,10 @@ class Viewer:
                         thickness = 1
                         lineType = 4
                         cv2.putText(self.image, text, org, fontFace, fontScale, fontcolor, thickness, lineType)
-                        #cv2.imshow('im',self.image)
-                        #cv2.waitKey(1)                        
-                    if False:#写入角点坐标和id,必须在此处写入才是lidar坐标系的，之后坐标就变到camera下了
-                        text=pts_3d_cam_cam[:,0:3]
-                        text=text.tolist()
-                        
-                        #text=str(text)
-                        org = (x.astype(np.int)-10, y.astype(np.int)-5)
-                        
-                        fontFace = cv2.FONT_HERSHEY_DUPLEX
-                        fontScale = 0.7
-                        fontcolor = (100,155,155)  # BGR
-                        thickness = 1
-                        lineType = 4
-                        cv2.putText(self.image, "123", org, fontFace, fontScale, fontcolor, thickness, lineType)                         
+                
+                    
 
-        if False:
+        if True:
             #此处添加lidar点云到2D画面
             for points,colors in self.points_info:
 
@@ -521,7 +508,7 @@ class Viewer:
                 self.image[y, x] = color
 
         cv2.imshow('im',self.image)
-        cv2.waitKey(1)
+        cv2.waitKey(10)
         if False:   #调试外参关闭
             self.points_info.clear()
             self.boxes_info.clear()

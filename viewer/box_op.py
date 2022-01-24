@@ -205,9 +205,10 @@ def get_line_boxes(boxes,
         corner_spheres = Spheres(corner_points[:,0:3], c= corner_colors, r=corner_spheres_radius,res = 12,alpha=corner_spheres_alpha)
 
         #添加文字
-        for i, element in enumerate(corner_points[:,0:3]):
-            text=Text3D(element,pos=element,s=0.05,justify="bottom-right")
-            text_actors.append(text)
+        if False:
+            for i, element in enumerate(corner_points[:,0:3]):
+                text=Text3D(element,pos=element,s=0.05,justify="bottom-right")
+                text_actors.append(text)
  
         arraws = Arrows(arraw_points1[:,0:3],arraw_points2[:,0:3],c = arraw_colors,s=heading_scale)
         lines_actors.append(lines)
