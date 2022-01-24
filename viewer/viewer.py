@@ -212,6 +212,7 @@ class Viewer:
 
         if add_to_3D_scene:
             if del_after_show:#进这里
+                #显示文字
                 self.actors += get_mesh_boxes(boxes,#返回vtk格式的box list
                                               colors,
                                               mesh_alpha,
@@ -220,6 +221,7 @@ class Viewer:
                                               box_info,
                                               show_box_info,
                                               caption_size)
+                #显示箭头和框架
                 self.actors += get_line_boxes(boxes,#返回vtk格式的线段 list
                                               colors,
                                               show_corner_spheres,
@@ -230,6 +232,7 @@ class Viewer:
                                               show_lines,
                                               line_width,
                                               line_alpha)
+                                             
             else:
                 self.actors_without_del += get_mesh_boxes(boxes,
                                                           colors,
@@ -435,19 +438,25 @@ class Viewer:
                     else:
                         color = box_color#设置颜色
 
-                    pts_3d_cam = get_box_points(box)    #得到bounding box在原始lidar坐标系下，添加了朝向，只会影响朝向暂时跳过排查
-                    pts_3d_cam = velo_to_cam(pts_3d_cam[:,0:3],self.cam_extrinsic_mat)#此时有归一化系数，取前三。继续添加外惨运算，到3d相机坐标系，最大嫌疑在此处
+                    pts_3d_cam_cam = get_box_points(box)    #得到bounding box在原始lidar坐标系下，添加了朝向，只会影响朝向暂时跳过排查
+                    #修改了一下相机坐标，这样可以保留lidar坐标系和camera坐标系的两个坐标
+
+                    pts_3d_cam = velo_to_cam(pts_3d_cam_cam[:,0:3],self.cam_extrinsic_mat)#此时有归一化系数，取前三。继续添加外惨运算，到3d相机坐标系，最大嫌疑在此处
 
                     img_pts = np.matmul(pts_3d_cam, self.cam_intrinsic_mat.T)  # (N, 3)#运算内参，到图像坐标系，此处没问题，所以最大问题就在这个之前
+                    #img_pts中存储了从A到B两个点的xy坐标
                     x, y = img_pts[:, 0] / img_pts[:, 2], img_pts[:, 1] / img_pts[:, 2]
+                    #(x[i]y[i])画(pts_3d_cam_cam[i][0:3])(x,y)-x,y,z
 
+
+                    #难怪效率低，这也太蠢了，画线是用x,y存储了A到B的一系列密集点。然后加粗是在此基础x+1 y+1再画2次……
                     x = np.clip(x, 2, W-2)
                     y = np.clip(y, 2, H-2)
 
                     x = x.astype(np.int)
                     y = y.astype(np.int)
 
-                    self.image[y, x] = color
+                    self.image[y, x] = color#4个点
 
                     x2 = x + 1
                     self.image[y, x2] = color
@@ -471,8 +480,23 @@ class Viewer:
                         thickness = 1
                         lineType = 4
                         cv2.putText(self.image, text, org, fontFace, fontScale, fontcolor, thickness, lineType)
+                        #cv2.imshow('im',self.image)
+                        #cv2.waitKey(1)                        
+                    if False:#写入角点坐标和id,必须在此处写入才是lidar坐标系的，之后坐标就变到camera下了
+                        text=pts_3d_cam_cam[:,0:3]
+                        text=text.tolist()
+                        
+                        #text=str(text)
+                        org = (x.astype(np.int)-10, y.astype(np.int)-5)
+                        
+                        fontFace = cv2.FONT_HERSHEY_DUPLEX
+                        fontScale = 0.7
+                        fontcolor = (100,155,155)  # BGR
+                        thickness = 1
+                        lineType = 4
+                        cv2.putText(self.image, "123", org, fontFace, fontScale, fontcolor, thickness, lineType)                         
 
-        if True:
+        if False:
             #此处添加lidar点云到2D画面
             for points,colors in self.points_info:
 

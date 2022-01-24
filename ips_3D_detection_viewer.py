@@ -48,8 +48,8 @@ def ips_viewer(ipu,cam,lidar_com,start_index=1):
             vi.add_image(image,deep_copy=True)#只是添加图片，没什么看的
             vi.set_extrinsic_mat(V2C)#设置外参，也没什么看的
 
-            vi.show_2D(show_box_info=True,show_ids=True)
-            #vi.show_3D()
+            #vi.show_2D(show_box_info=True,show_ids=True)
+            vi.show_3D()
 
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/ips_3D_detection_viewer.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": [

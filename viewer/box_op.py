@@ -122,6 +122,7 @@ def get_line_boxes(boxes,
     lines_actors = []
     sphere_actors = []
     arraw_actors = []
+    text_actors=[]
 
 
     for i in range(len(boxes)):
@@ -178,6 +179,7 @@ def get_line_boxes(boxes,
         corner_points2.append([x / 2, y / 2, -z / 2, 1])
         corner_points2.append([x / 2, y / 2, z / 2, 1])
         corner_points2.append([-x / 2, y / 2, z / 2, 1])
+        
 
         arraw_points1.append([0, 0, 0, 1])
         arraw_points2.append([x / 2 , 0, 0, 1])
@@ -199,13 +201,20 @@ def get_line_boxes(boxes,
             arraw_colors = colors
 
         lines = Lines(corner_points1[:, 0:3], corner_points2[:, 0:3], c=this_c, alpha=line_alpha, lw=line_width)
-
+        #此处添加顶点
         corner_spheres = Spheres(corner_points[:,0:3], c= corner_colors, r=corner_spheres_radius,res = 12,alpha=corner_spheres_alpha)
 
+        #添加文字
+        for i, element in enumerate(corner_points[:,0:3]):
+            text=Text3D(element,pos=element,s=0.05,justify="bottom-right")
+            text_actors.append(text)
+ 
         arraws = Arrows(arraw_points1[:,0:3],arraw_points2[:,0:3],c = arraw_colors,s=heading_scale)
         lines_actors.append(lines)
         sphere_actors.append(corner_spheres)
         arraw_actors.append(arraws)
+        
+     
 
     return_list =[]
 
@@ -215,6 +224,8 @@ def get_line_boxes(boxes,
         return_list+=arraw_actors
     if show_lines:
         return_list+=lines_actors
+
+    return_list+=text_actors
 
     return return_list
 
