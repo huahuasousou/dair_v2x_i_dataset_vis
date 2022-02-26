@@ -1,8 +1,14 @@
 version: '3.7'
-path: /temp_dataset
-SequenceName: Sequence1
-SequencePart: d
-view1_sequence: 1_Rec20131118135501_TS_merged_part4of4.mat
-view2_sequence: 2_Rec20131118135501_TS_merged_part4of4.mat
-labels: 3_BoxfittingLabels_REF_GP_eff_part4of4.mat
-save_folders: convert_output 
+root_path: /home/liuchenghua/datasets_nfs/dair_v2x_i
+data_info: source_format/single-infrastructure-side/data_info.json
+
+output_path: /home/liuchenghua/datasets_nfs/dair_v2x_i
+output_floder_name: kitti_format 
+calib_floder: 'source_format/single-infrastructure-side/calib/camera_intrinsic'
+lidar_to_camera_floder: 'source_format/single-infrastructure-side/calib/virtuallidar_to_camera'
+camera_label_floder: 'source_format/single-infrastructure-side/label/camera'
+lidar_label_floder: 'source_format/single-infrastructure-side/label/virtuallidar'
+image_floder: 'source_format/single-infrastructure-side-image'
+velodyne_floder: 'source_format/single-infrastructure-side-velodyne'
+camera_label_floder: source_format/single-infrastructure-side/label/camera
+virtuallidar_label_floder: source_format/single-infrastructure-side/label/virtuallidar
