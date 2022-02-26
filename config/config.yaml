@@ -1,0 +1,8 @@
+version: '3.7'
+path: /temp_dataset
+SequenceName: Sequence1
+SequencePart: d
+view1_sequence: 1_Rec20131118135501_TS_merged_part4of4.mat
+view2_sequence: 2_Rec20131118135501_TS_merged_part4of4.mat
+labels: 3_BoxfittingLabels_REF_GP_eff_part4of4.mat
+save_folders: convert_output 
