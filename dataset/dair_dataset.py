@@ -1,6 +1,6 @@
 import numpy as np
 import re
-from .ips_data_base import *
+from .dair_data_base import *
 import os
 import sys
 import getopt
@@ -8,6 +8,7 @@ import getopt
 def get_arg():
     name = None
     url = None
+    label_select=None
     ipu_view=None
     camera_select=None #cam1 or cam2
     lidar_com=None #True select COM data

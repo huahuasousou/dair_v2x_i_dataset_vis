@@ -10,34 +10,25 @@ return: P2: (4,4) 3D camera coordinates to 2D image pixels
         vtc_mat: (4,4) 3D velodyne Lidar coordinates to 3D camera coordinates
 """
 def read_calib(calib_path):
-
-    K11=np.array((9.837163130824076e+02,0,0,\
-        0,8.595545273466768e+02,0,\
-        9.404020659139954e+02,5.756271947729268e+02,1),np.float32)
-
-
-    K11=K11.reshape((3,3)).T
-    K11= np.insert(K11, 3, values=0, axis=1)
-    K11= np.insert(K11, 3, values=0, axis=0)    
-
-    P11=np.array((0.14200562691952617, -0.9888265486076867, -0.045348193919961095, 1.0285320021923907,\
-                -0.4095134968418579, -0.0169787561689188, -0.9121460506647551, -1.2267393975465035,\
-                0.9011842751776943, 0.14810056923444437, -0.4073488966044802, 0.12756363884073307,     #-z    
-                0, 0, 0, 1),np.float32)
-    
-    P11=P11.reshape((4,4))
-    pnp_124=np.array((0.09898239, -0.99444389, -0.0358307 ,  0.61027121,
-                -0.43808586, -0.01121822, -0.89886313, -0.87806606,
-                0.89346699,  0.10466854, -0.43676221, -0.48082524,
-                0.00000000e+00,  0.00000000e+00,  0.00000000e+00,1.00000000e+00),np.float32)
-    pnp_124=np.array(( 0.07076302, -0.99672228, -0.03920818,  0.9478876,
-                -0.46336771,  0.001962  , -0.88616393, -0.46603155,
-                0.88333627,  0.08087544, -0.46171009, -0.30007352,
-                0.00000000e+00,  0.00000000e+00,  0.00000000e+00,1.00000000e+00),np.float32)                
-    pnp_124=pnp_124.reshape((4,4))
-
-    P11=pnp_124
-    return (K11, P11)
+    with open(calib_path) as f:
+        for line in f.readlines():
+            if line[:2] == "P2":
+                P2 = re.split(" ", line.strip())
+                P2 = np.array(P2[-12:], np.float32)
+                P2 = P2.reshape((3, 4))
+            if line[:14] == "Tr_velo_to_cam" or line[:11] == "Tr_velo_cam":
+                vtc_mat = re.split(" ", line.strip())
+                vtc_mat = np.array(vtc_mat[-12:], np.float32)
+                vtc_mat = vtc_mat.reshape((3, 4))
+                vtc_mat = np.concatenate([vtc_mat, [[0, 0, 0, 1]]])
+            if line[:7] == "R0_rect" or line[:6] == "R_rect":
+                R0 = re.split(" ", line.strip())
+                R0 = np.array(R0[-9:], np.float32)
+                R0 = R0.reshape((3, 3))
+                R0 = np.concatenate([R0, [[0], [0], [0]]], -1)
+                R0 = np.concatenate([R0, [[0, 0, 0, 1]]])
+    vtc_mat = vtc_mat
+    return (P2, vtc_mat)
 
 
 """
