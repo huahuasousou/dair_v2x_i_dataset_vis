@@ -20,7 +20,8 @@ def dair_viewer(config_data):
 
     vi = Viewer(box_type="Dair_V2X_I")
     vi.set_ob_color_map('gnuplot')
-    for i in range(len(dataset)):#这里修改文件名
+    #for i in range(len(dataset)):#这里修改文件名
+    for i in dataset.all_ids:
         P2, V2C, points, image, labels, label_names = dataset[i]
 
         #mask = label_names=="Car"   #只显示Car
@@ -36,7 +37,7 @@ def dair_viewer(config_data):
         vi.set_extrinsic_mat(V2C)#设置外参，也没什么看的
         vi.set_intrinsic_mat(P2)#设置内参，没什么问题
         
-        vi.show_2D(label_select=dataset.label_select)
+        vi.show_2D(label_select=dataset.label_select,index_name=i)
         vi.show_3D()
 
 

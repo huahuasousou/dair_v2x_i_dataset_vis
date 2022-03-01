@@ -403,7 +403,7 @@ class Viewer:
         self.points_info.clear()
         self.boxes_info.clear()
 
-    def show_2D(self,box_color = (255,0,0),show_box_info=False,show_ids=True,points_colors=(0,0,255),label_select= None):
+    def show_2D(self,box_color = (255,0,0),show_box_info=False,show_ids=True,points_colors=(0,0,255),label_select= None,index_name=None):
         """
         show object on image
         :param box_color: (list or tuple(3,)), default color
@@ -495,7 +495,7 @@ class Viewer:
                 self.image[0,0]=[0,0,0]
 
                 self.image[y, x] = color
-
+        cv2.putText(self.image, str(index_name), (100,100), cv2.FONT_HERSHEY_DUPLEX, 0.9, color, 1, 4)
         cv2.imshow('im',self.image)
         cv2.waitKey(10)
         self.points_info.clear()
