@@ -5,73 +5,44 @@ import os
 import sys
 import getopt
 
-def get_arg():
-    name = None
-    url = None
-    label_select=None
-    ipu_view=None
-    camera_select=None #cam1 or cam2
-    lidar_com=None #True select COM data
 
- 
-    argv = sys.argv[1:]
- 
-    try:
-        opts, args = getopt.getopt(argv, "i:c:l:",  
-                                   ["ipu=",
-                                    "cam=",
-                                    "lidar="])  # 长选项模式
-     
-    except:
-        print("Error")
- 
-    for opt, arg in opts:
-        if opt in ['-i', '--ipu']:
-            ipu_view = arg
-        elif opt in ['-c', '--cam']:
-            camera_select = arg
-        elif opt in ['-l', '--lidar']:
-            lidar_com = arg     
- 
+def traverse(f):# list dir and sort
+    fs = os.listdir(f)
+    fs.sort()
+    return fs
 
-    return ipu_view,camera_select,lidar_com
+def namechange(name_list,new_suffix):# change the suffix
+    new_name=[]
+    for name in name_list:
+        portion = os.path.splitext(name)
+        new_name.append(portion[0] + new_suffix)
+    
+    return new_name
 
+class DairDetectionDataset:
+    def __init__(self,config_data= None):
+        self.root_path = os.path.join(config_data['root_path'],config_data['output_floder_name'])
+        self.label_select= config_data['label_select']
+        if self.label_select=='cam':
+            self.label_path=os.path.join(self.root_path,"label_2")
+        elif self.label_select=='vel':
+            self.label_path=os.path.join(self.root_path,"label_velodyne")        
+        self.calib_path=os.path.join(self.root_path,"calib")
+        self.velo_path = os.path.join(self.root_path,"velodyne")     
+        self.image_path = os.path.join(self.root_path,"image_2")   
+        self.label_name=".txt"
+        self.lidar_name=".pcd"
+        self.cam_name=".jpg"
+        self.calib_name=".txt"
 
-class IPS300DetectionDataset:
-    def __init__(self,root_path,label_path = None,calib_path = None,ipu = None, cam = None, lidar_com = None):
-        self.root_path = root_path
-        self.calib_path = calib_path
-        self.label_path = label_path
-        
-        self.label_name="_LABEL.txt"
+        self.all_ids = traverse(self.label_path)
+        self.all_ids=namechange(self.all_ids,"")#delete the suffix
+        print("type",type(self.all_ids))
 
-        if lidar_com=="com":
-            self.lidar_name="_COM_ROI.pcd"
-            self.velo_path = os.path.join(self.root_path,"PCD_COM_ROI")
-        if ipu=="1":
-            self.cam_name="_IPU1"
-            
-            self.root_path=os.path.join(self.root_path,'IPU1')
-            if lidar_com!="com":
-                self.lidar_name="_IPU1_LIDAR.pcd"
-                self.velo_path = os.path.join(self.root_path,"IPU1_pcd")
-            if cam=="1":
-                self.cam_name=self.cam_name+"_CAM1_UNDISTORT.jpg"
-                self.image_path = os.path.join(self.root_path,"IPU1_cam1_undistort")
-            if cam=="2":
-                self.cam_name=self.cam_name+"_CAM2.png"
-                self.image_path = os.path.join(self.root_path,"IPU1_cam2")  
-        elif ipu=="2":
-            self.root_path=os.path.join(self.root_path,'IPU2')
-            if lidar_com!="com":
-                               
-                self.velo_path = os.path.join(self.root_path,"IPU2_pcd")
-            if cam=="1":
-                self.image_path = os.path.join(self.root_path,"IPU2_cam1")
-            if cam=="2":
-                self.image_path = os.path.join(self.root_path,"IPU2_cam2")    
-        self.calib_name="calib_file.txt"
-        self.all_ids = os.listdir(self.velo_path)
+        #self.all_ids = os.path.splitext(self.all_ids)
+        #self.all_ids=self.all_ids[0]
+        #print(self.all_ids)
+
         if True:       
             print("root:",self.root_path) 
             print("label_path:",self.label_path)  
@@ -85,13 +56,13 @@ class IPS300DetectionDataset:
         return len(self.all_ids)
     def __getitem__(self, item):
         name = str(item).zfill(6)
-
-        velo_path = os.path.join(self.velo_path,name+self.lidar_name)
+        velo_path = os.path.join(self.velo_path, name+self.lidar_name)
         image_path = os.path.join(self.image_path, name+self.cam_name)
-        calib_path = os.path.join(self.calib_path, self.calib_name)#未实现，修改
+        calib_path = os.path.join(self.calib_path, name+self.calib_name)
         label_path = os.path.join(self.label_path, name+self.label_name)
 
-        P2,V2C = read_calib(calib_path)#仅实现ipu1cam1
+
+        P2,V2C = read_calib(calib_path)#
         points = read_velodyne(velo_path,P2,V2C)#这里检查过没问题，对点云做了多次运算，为删除视野外点云。
         image = read_image(image_path)#仅支持去畸变后图像
         labels,label_names = read_detection_label(label_path)

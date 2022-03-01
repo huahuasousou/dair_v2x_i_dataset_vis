@@ -12,22 +12,25 @@ return: P2: (4,4) 3D camera coordinates to 2D image pixels
 def read_calib(calib_path):
     with open(calib_path) as f:
         for line in f.readlines():
+            """
             if line[:2] == "P2":
                 P2 = re.split(" ", line.strip())
                 P2 = np.array(P2[-12:], np.float32)
                 P2 = P2.reshape((3, 4))
+            """
+            if line[:2] == "P2":
+                P2 = re.split(" ", line.strip())
+                P2 = np.array(P2[-9:], np.float32)
+                P2 = P2.reshape((3, 3))
+                b = np.array([[0,0,0]])
+                P2=np.c_[P2,b.T]
+                print(P2)
+
             if line[:14] == "Tr_velo_to_cam" or line[:11] == "Tr_velo_cam":
                 vtc_mat = re.split(" ", line.strip())
                 vtc_mat = np.array(vtc_mat[-12:], np.float32)
                 vtc_mat = vtc_mat.reshape((3, 4))
                 vtc_mat = np.concatenate([vtc_mat, [[0, 0, 0, 1]]])
-            if line[:7] == "R0_rect" or line[:6] == "R_rect":
-                R0 = re.split(" ", line.strip())
-                R0 = np.array(R0[-9:], np.float32)
-                R0 = R0.reshape((3, 3))
-                R0 = np.concatenate([R0, [[0], [0], [0]]], -1)
-                R0 = np.concatenate([R0, [[0, 0, 0, 1]]])
-    vtc_mat = vtc_mat
     return (P2, vtc_mat)
 
 
@@ -68,8 +71,8 @@ def read_velodyne(path, P, vtc_mat,IfReduce=True):
     lidar_copy[:, 0:3] = lidar#这里不明白，xyz重新赋值，最后一列强度值0.2也没有删掉，除了损失精度还有什么意义？
     x, y = img_pts[:, 0] / img_pts[:, 2], img_pts[:, 1] / img_pts[:, 2]#这个函数里面的2d运算看懂了，是为了取得视角mask，删掉无用点云，不涉及2d图像显示，但是会影响3d视野可见点云
     mask = np.logical_and(np.logical_and(x >= 0, x < max_col), np.logical_and(y >= 0, y < max_row))
-    #return lidar_copy
-    return lidar_copy[mask]#暂时屏蔽，输出全部点云
+    return lidar_copy
+    #return lidar_copy[mask]#暂时屏蔽，输出全部点云
 
 
 """
