@@ -403,7 +403,7 @@ class Viewer:
         self.points_info.clear()
         self.boxes_info.clear()
 
-    def show_2D(self,box_color = (255,0,0),show_box_info=False,show_ids=True,points_colors=(0,0,255)):
+    def show_2D(self,box_color = (255,0,0),show_box_info=False,show_ids=True,points_colors=(0,0,255),label_select= None,index_name=None):
         """
         show object on image
         :param box_color: (list or tuple(3,)), default color
@@ -435,6 +435,7 @@ class Viewer:
                         color = box_color#设置颜色
 
                     pts_3d_cam = get_box_points(box)    #得到bounding box在原始lidar坐标系下，添加了朝向，只会影响朝向暂时跳过排查
+                    #if label_select=='vel': #如果是从lidar label读取则需要转换到camera坐标系
                     pts_3d_cam = velo_to_cam(pts_3d_cam[:,0:3],self.cam_extrinsic_mat)#此时有归一化系数，取前三。继续添加外惨运算，到3d相机坐标系，最大嫌疑在此处
 
                     img_pts = np.matmul(pts_3d_cam, self.cam_intrinsic_mat.T)  # (N, 3)#运算内参，到图像坐标系，此处没问题，所以最大问题就在这个之前
@@ -494,7 +495,7 @@ class Viewer:
                 self.image[0,0]=[0,0,0]
 
                 self.image[y, x] = color
-
+        cv2.putText(self.image, str(index_name), (100,100), cv2.FONT_HERSHEY_DUPLEX, 0.9, color, 1, 4)
         cv2.imshow('im',self.image)
         cv2.waitKey(10)
         self.points_info.clear()
