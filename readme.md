@@ -21,13 +21,29 @@ This code includes two parts, one for convert tools, other one for visualization
 
 ## Requirements (Updated 2021.11.2)
 ```
-python3
-numpy==1.21.3
-vedo==2021.0.6
-vtk==9.0.3
-opencv==4.5.4.58
+python==3.7.11
+numpy==1.21.4
+vedo==2022.0.1
+vtk==8.1.2
+opencv-python==4.1.1.26
 matplotlib==3.4.3
+open3d==0.14.1
 ```
+It is recommended to use anaconda to create the visualization environment
+```
+conda create -n dair_vis python=3.8
+```
+# To activate this environment, use
+#
+#     $ conda activate dair_vis
+#
+# To deactivate an active environment, use
+#
+#     $ conda deactivate
+```
+pip install -r requirements.txt
+```
+
 ## Convert tools 
 * Prepare a dataset of the following structure:
 * "kitti_format" must be an empty folder to store the conversion result
