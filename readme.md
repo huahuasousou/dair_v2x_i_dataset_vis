@@ -37,6 +37,7 @@ To activate this environment, use
 ```
 conda activate dair_vis
 ```
+Install the requirements
 ```
 pip install -r requirements.txt
 ```
