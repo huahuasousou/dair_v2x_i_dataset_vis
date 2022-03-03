@@ -1,65 +1,24 @@
 # 3D Detection & Tracking Viewer
-This project was developed for view 3D object detection and tracking results.
-It supports rendering 3D bounding boxes as car models and rendering boxes on images.
+The project is based on XXX and is modified, you can find the original version of the code below:
+https://github.com/hailanyi/3D-Detection-Tracking-Viewer
+
+This project was developed for viewing 3D object detection results from the Dair-V2X-I datasets.
+
+It supports rendering 3D bounding boxes and rendering boxes on images.
 
 ## Features
-* Rendering boxes as cars
+
 * Captioning box ids(infos) in 3D scene
 * Projecting 3D box or points on 2D image  
 ![](./doc/125.gif)
 ## Design pattern
-This code includes two parts, one for data loading, other one for visualization of 3D detection and tracking results.
-The overall framework of design is shown below:
-![](./doc/framework.jpg)
+This code includes two parts, one for convert tools, other one for visualization of 3D detection results.
 ## Change log
-* (2021.11.2) update 'Requirements'; update ```viewer/box_op.py``` to adapt 'vedo'.
+* (2022.02.01) Adapted to the Dair-V2X-I dataset
 ## Prepare data 
-* Kitti detection dataset
-```
-# For Kitti Detection Dataset         
-└── kitti_detection
-       ├── testing 
-       |      ├──calib
-       |      ├──image_2
-       |      ├──label_2
-       |      └──velodyne      
-       └── training
-              ├──calib
-              ├──image_2
-              ├──label_2
-              └──velodyne 
-```
-* Kitti tracking dataset
-```
-# For Kitti Tracking Dataset         
-└── kitti_tracking
-       ├── testing 
-       |      ├──calib
-       |      |    ├──0000.txt
-       |      |    ├──....txt
-       |      |    └──0028.txt
-       |      ├──image_02
-       |      |    ├──0000
-       |      |    ├──....
-       |      |    └──0028
-       |      ├──label_02
-       |      |    ├──0000.txt
-       |      |    ├──....txt
-       |      |    └──0028.txt
-       |      └──velodyne
-       |           ├──0000
-       |           ├──....
-       |           └──0028      
-       └── training # the structure is same as testing set
-              ├──calib
-              ├──image_02
-              ├──label_02
-              └──velodyne 
-```
-* Waymo dataset
+* Dair-V2X-I detection dataset
+* Convert the Dair-V2X-I dataset to kitti format using the conversion tool
 
-Please refer to the  [OpenPCDet](https://github.com/open-mmlab/OpenPCDet)
-for Waymo dataset organization.
 ## Requirements (Updated 2021.11.2)
 ```
 python3
@@ -69,108 +28,81 @@ vtk==9.0.3
 opencv==4.5.4.58
 matplotlib==3.4.3
 ```
+## Convert tools 
+* Prepare a dataset of the following structure:
+* "kitti_format" must be an empty folder to store the conversion result
+* "source_format" to store the source Dair-V2X-I datasets.
+```
+# For Dair-V2X-I Dataset  
+dair_v2x_i
+├── kitti_format
+├── source_format
+│   ├── single-infrastructure-side
+│   │   ├── calib
+│   │   │   ├── camera_intrinsic
+│   │   │   └── virtuallidar_to_camera
+│   │   └── label
+│   │       ├── camera
+│   │       └── virtuallidar
+│   ├── single-infrastructure-side-example
+│   │   ├── calib
+│   │   │   ├── camera_intrinsic
+│   │   │   └── virtuallidar_to_camera
+│   │   ├── image
+│   │   ├── label
+│   │   │   ├── camera
+│   │   │   └── virtuallidar
+│   │   └── velodyne
+│   ├── single-infrastructure-side-image
+│   └── single-infrastructure-side-velodyne
+
+```
+
+* If you have the same folder structure, you only need change the "root path" to your local path from config/config.yaml
+* Running the jupyter notebook server and open the "convert.ipynb"
+* The code is very simple , so there are no input parameters for advanced customization, you need to comment or copy the code to implemented separately following functions :
+-Convert calib files to KITTI format
+-Convert camera-based label files to KITTI format
+-Convert lidar-based label files to KITTI format
+-Convert image folders to KITTI format
+-Convert velodyne folders to KITTI format
+
+After the convet you will get the following result.
+the 
+```      
+dair_v2x_i
+├── kitti_format
+│   ├── calib
+│   ├── image_2
+│   ├── label_2
+│   ├── label_velodyne
+│   └── velodyne
+ 
+```
+* The label_2 base the camera label, and use the lidar label information replace the size information(w,h,l). In the camera view looks like better.
+* The label_velodyne base the velodyne label.
+* P2 represents the camera internal reference, which is a 3×3 matrix, not the same as KITTI. It convert frome the "cam_K" of the json file.
+* Tr_velo_to_cam: represents the camera to lidar transformation matrix, as a 3×4 matrix.
+
+
 ## Usage
-#### 1. Set boxes type & viewer background color
+#### 1. Set the path to the dataset folder used for input to the visualizer
+If you have completed the conversion operation, the path should have been set correctly. Otherwise you need to set "root_path" in the config/config.yaml to the correct path
 
-Currently this code supports Kitti (h,w,l,x,y,z,yaw) and Waymo OpenPCDet (x,y,z,l,w,h,yaw) box type.
-You can set the box type and background color when initializing a viewer as 
-```
-from viewer.viewer import Viewer
+#### 2. Choose whether camera or lidar based tagging for visualization
+You need to set the "label_select" parameter in config.yaml to "cam" or "vel", to specify the label frome label_2 or velodyne_label.
 
-vi = Viewer(box_type="Kitti",bg = (255,255,255))
+#### 2. Run and Terminate
+* You can start the program with the following command
 ```
-#### 2. Set objects color map
-You can set the objects color map for view tracking results, same as
- [matplotlab.pypot](https://matplotlib.org/stable/tutorials/colors/colormaps.html) color map.
-The common used color maps are "rainbow", "viridis","brg","gnuplot","hsv" and etc.
+python dair_3D_detection_viewer.py
 ```
-vi.set_ob_color_map('rainbow')
-```
-#### 3. Add colorized point clouds to 3D scene
-The viewer receives a set of points, it must be a array with shape (N,3).
-If you want to view the scatter filed, you should set the 'scatter_filed' with a shape (N,), and 
-set the 'color_map_name' to specify the colors.
-If the 'scatter_filed' is None, the points will show in color of 'color' arg.
-```
-vi.add_points(points[:,0:3],
-               radius = 2,
-               color = (150,150,150),
-               scatter_filed = points[:,2],
-               alpha=1,
-               del_after_show = True,
-               add_to_3D_scene = True,
-               add_to_2D_scene = True,
-               color_map_name = "viridis")
-```
-![](./doc/points.png)
+* Pressing space in the lidar window will display the next frame
+* Terminating the program is more complicated, you cannot terminate the program at static image status. You need to press the space quickly to make the frames play continuously, and when it becomes obvious that the system is overloaded with resources and the program can't respond, press Ctrl-C in the terminal window to terminate it. Try a few more times and you will eventually get the hang of it.
 
-#### 4. Add boxes or cars to 3D scene
-The viewer receives a set of boxes, it must be a array with shape (N,7). You can set the boxes to meshes or lines only,
-you can also set the line width, conner points. Besides, you can provide a set of IDs(int) to colorize the boxes, and 
-put a set of additional infos to caption the boxes. Note that, the color will set to the color of "color" arg if the
-ids is None.
-```
-vi.add_3D_boxes(boxes=boxes[:,0:7],
-                 ids=ids,
-                 box_info=infos,
-                 color="blue",
-                 add_to_3D_scene=True,
-                 mesh_alpha = 0.3,
-                 show_corner_spheres = True,
-                 corner_spheres_alpha = 1,
-                 corner_spheres_radius=0.1,
-                 show_heading = True,
-                 heading_scale = 1,
-                 show_lines = True,
-                 line_width = 2,
-                 line_alpha = 1,
-                 show_ids = True,
-                 show_box_info=True,
-                 del_after_show=True,
-                 add_to_2D_scene=True,
-                 caption_size=(0.05,0.05)
-                 )
-```
-![](./doc/box.png)
-
-You can also render the boxes as cars, the input format is same as boxes.
-```
-vi.add_3D_cars(boxes=boxes[:,0:7],
-                 ids=ids,
-                 box_info=infos,
-                 color="blue",
-                 mesh_alpha = 1,
-                 show_ids = True,
-                 show_box_info=True,
-                 del_after_show=True,
-                 car_model_path="viewer/car.obj",
-                 caption_size = (0.1, 0.1)
-                )
-```
-![](./doc/cars.png)
-
-#### 5. View boxes or points on image
-To view the 3D box and points on image, firstly should set the camera intrinsic, extrinsic mat, and put a image.
-Besides, when adding the boxes and points, the 'add_to_2D_scene' should be set to True.
-```
-vi.add_image(image)
-vi.set_extrinsic_mat(V2C)
-vi.set_intrinsic_mat(P2)
-```
-#### 6. Show 2D and 3D results
-To show a single frame, you can directly run ```vi.show_2D()```, ``` vi.show_3D()```. The visualization window will
-not close until you press the "Enter" key. 
-You can change the viewing angle by dragging the mouse within the visualization window.
-
-To show multiple frames, you can use the for loop. While the code is running, please first click on the 3D window and then press the "Enter" key to view a sequence data.
-```
-for i in range(len(dataset)):
-    V2C, P2, image, boxes = dataset[i]
-    vi.add_3D_boxes(boxes)
-    vi.add_image(image)
-    vi.set_extrinsic_mat(V2C)
-    vi.set_intrinsic_mat(P2)
-    vi.show_2D()
-    vi.show_3D()
-```
-       
+## Notes on the Dair-V2X-I dataset
+* In the calib file of this dataset, "cam_K" is the real intrinsic matrix parameter of the camera, not "P". Although they are very close in value and structure.
+* There are multiple camera images with different focal and perspectives in this dataset, and the camera intrinsic matrix reference will change with each image file. Therefore, when using this dataset, please make sure that the calib file you are using corresponds to the image file (e.g. do not use only the 000000.txt parameter for all image files)
+* The sequence of files in this dataset is non-contiguous (e.g. missing the 000023), do not only use 00000 to lens(dataset) to get the sequence of file names directly.
+* The dataset provides optimized labels for both lidar and camera, and after testing, there are errors in the projection of the lidar label on camera (but the projection matrix is correct, only the label itself has issues). Likewise, there is a disadvantage of using the camera's label in lidar. Therefore it is recommended to use the corresponding label for lidar, and use the fused label for the camera.
+* There are some other objects in the label, for example you can see some trafficcone.
