@@ -10,7 +10,7 @@ It supports rendering 3D bounding boxes and rendering boxes on images.
 
 * Captioning box ids(infos) in 3D scene
 * Projecting 3D box or points on 2D image  
-![](./doc/125.gif)
+
 ## Design pattern
 This code includes two parts, one for convert tools, other one for visualization of 3D detection results.
 ## Change log
@@ -33,16 +33,19 @@ It is recommended to use anaconda to create the visualization environment
 ```
 conda create -n dair_vis python=3.8
 ```
-# To activate this environment, use
-#
-#     $ conda activate dair_vis
-#
-# To deactivate an active environment, use
-#
-#     $ conda deactivate
+To activate this environment, use
+```
+conda activate dair_vis
+```
 ```
 pip install -r requirements.txt
 ```
+To deactivate an active environment, use
+```
+conda deactivate
+```
+
+
 
 ## Convert tools 
 * Prepare a dataset of the following structure:
