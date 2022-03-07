@@ -1,5 +1,5 @@
 # 3D Detection & Tracking Viewer
-The project is based on XXX and is modified, you can find the original version of the code below:
+The project is based on hailanyi/3D-Detection-Tracking-Viewer and is modified, you can find the original version of the code below:
 https://github.com/hailanyi/3D-Detection-Tracking-Viewer
 
 This project was developed for viewing 3D object detection results from the Dair-V2X-I datasets.
