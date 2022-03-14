@@ -13,3 +13,11 @@ image_floder: 'source_format/single-infrastructure-side-image'
 velodyne_floder: 'source_format/single-infrastructure-side-velodyne'
 camera_label_floder: source_format/single-infrastructure-side/label/camera
 virtuallidar_label_floder: source_format/single-infrastructure-side/label/virtuallidar
+
+random_seed: 2      #Set the random seed used to generate the splitting file for duplication and version control
+onlyFileName: True      #Option to generate file names or absolute paths
+train_set_proportion: 0.7
+validation_set_proportion: 0.15
+test_set_proportion: 0.15
+
+
