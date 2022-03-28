@@ -20,4 +20,7 @@ train_set_proportion: 0.7
 validation_set_proportion: 0.2
 test_set_proportion: 0.1
 
-
+define_list_path_flag: True
+only image_list_flag: True
+image_list_define_path: training/image_2/
+image_label_list_path: training/label_2/
