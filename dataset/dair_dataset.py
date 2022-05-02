@@ -23,11 +23,16 @@ class DairDetectionDataset:
     def __init__(self,config_data= None):
         self.root_path = os.path.join(config_data['root_path'],config_data['output_floder_name'])
         self.label_select= config_data['label_select']
+        #self.label_path='/home/liuchenghua/Downloads/0428/data'
+        
         if self.label_select=='cam':
-            self.label_path=os.path.join(self.root_path,"label_2")
+            self.label_path=os.path.join(self.root_path,"label_0410")
         elif self.label_select=='vel':
-            self.label_path=os.path.join(self.root_path,"label_velodyne")        
-        self.calib_path=os.path.join(self.root_path,"calib")
+            self.label_path=os.path.join(self.root_path,"label_velodyne")             
+        
+        
+   
+        self.calib_path=os.path.join(self.root_path,"calib_originP23X3")
         self.velo_path = os.path.join(self.root_path,"velodyne")     
         self.image_path = os.path.join(self.root_path,"image_2")   
         self.label_name=".txt"
