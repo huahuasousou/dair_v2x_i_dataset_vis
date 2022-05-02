@@ -117,10 +117,16 @@ def read_detection_label(path):
         for line in f.readlines():
             line = line.split()
             this_name = line[0]
-            if this_name != "DontCare":
-                line = np.array(line[-7:],np.float32)
-                boxes.append(line)
-                names.append(this_name)
+            if len(line)==16:# test result
+                if this_name != "DontCare":
+                    line = np.array(line[-8:-1],np.float32)
+                    boxes.append(line)
+                    names.append(this_name)
+            else:   
+                if this_name != "DontCare":
+                    line = np.array(line[-7:],np.float32)
+                    boxes.append(line)
+                    names.append(this_name)                
 
     return np.array(boxes),np.array(names)
 
