@@ -5,18 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "dair",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/dair_3D_detection_viewer.py",
             "console": "integratedTerminal",
-            "justMyCode": false,
-            "args": [
-                "-i",
-                "1",
-                "-c",
-                "1"
-            ]
-        }
+            "justMyCode": false
+
+        } 
     ]
 }
