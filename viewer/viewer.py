@@ -280,7 +280,7 @@ class Viewer:
 
             ang=bb[6]#取出角度
             ang = int(ang / (2 * np.pi) * 360)#转换角度
-
+            #ang=0
             if type(colors) is str:
                 color = colors#赋值颜色
             else:
