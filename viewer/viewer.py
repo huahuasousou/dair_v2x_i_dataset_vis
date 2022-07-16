@@ -5,6 +5,7 @@ import vtk
 from .color_map import generate_objects_color_map,generate_objects_colors,generate_scatter_colors
 from .box_op import convert_box_type,get_line_boxes,get_mesh_boxes,velo_to_cam,get_box_points
 import copy
+import os
 class Viewer:
     """
     default box type: "OpenPCDet", (x,y,z,l,w,h,yaw)
@@ -472,7 +473,7 @@ class Viewer:
                         lineType = 4
                         cv2.putText(self.image, text, org, fontFace, fontScale, fontcolor, thickness, lineType)
 
-        if True:
+        if False:
             #此处添加lidar点云到2D画面
             for points,colors in self.points_info:
 
@@ -496,8 +497,13 @@ class Viewer:
 
                 self.image[y, x] = color
         cv2.putText(self.image, str(index_name), (100,100), cv2.FONT_HERSHEY_DUPLEX, 0.9, color, 1, 4)
-        cv2.imshow('im',self.image)
-        cv2.waitKey(10)
+        if False:    #save image
+            save_path='/home/liuchenghua/output'
+            save_name=os.path.join(save_path,str(index_name)+'.jpg')
+            cv2.imwrite(save_name,self.image,[int(cv2.IMWRITE_JPEG_QUALITY),95])
+        else:   #否则显示图像
+            cv2.imshow('im',self.image)
+            cv2.waitKey(10)
         self.points_info.clear()
         self.boxes_info.clear()
 

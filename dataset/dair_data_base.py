@@ -12,7 +12,7 @@ return: P2: (4,4) 3D camera coordinates to 2D image pixels
 def read_calib(calib_path):
     with open(calib_path) as f:
         for line in f.readlines():
-            """
+            
             if line[:2] == "P2":
                 P2 = re.split(" ", line.strip())
                 P2 = np.array(P2[-12:], np.float32)
@@ -24,7 +24,7 @@ def read_calib(calib_path):
                 P2 = P2.reshape((3, 3))
                 b = np.array([[0,0,0]])
                 P2=np.c_[P2,b.T]
-
+            """
             if line[:14] == "Tr_velo_to_cam" or line[:11] == "Tr_velo_cam":
                 vtc_mat = re.split(" ", line.strip())
                 vtc_mat = np.array(vtc_mat[-12:], np.float32)

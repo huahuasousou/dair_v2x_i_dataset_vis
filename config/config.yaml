@@ -1,5 +1,5 @@
 version: '3.7'
-label_select: cam
+label_select: test
 root_path: /home/liuchenghua/datasets_nfs/dair_v2x_i
 data_info: source_format/single-infrastructure-side/data_info.json
 

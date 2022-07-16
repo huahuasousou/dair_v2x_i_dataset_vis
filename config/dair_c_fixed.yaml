@@ -1,0 +1,27 @@
+version: '3.7'
+label_select: label_fixed0716
+root_path: /home/liuchenghua/datasets_nfs/dair_v2x_c
+data_info: source_format/cooperative-vehicle-infrastructure/infrastructure-side/data_info.json
+
+output_path: /home/liuchenghua/datasets_nfs/dair_v2x_c
+output_floder_name: kitti_format 
+calib_floder: 'source_format/cooperative-vehicle-infrastructure/infrastructure-side/calib/camera_intrinsic'
+lidar_to_camera_floder: 'source_format/cooperative-vehicle-infrastructure/infrastructure-side/calib/virtuallidar_to_camera'
+camera_label_floder: 'source_format/cooperative-vehicle-infrastructure/infrastructure-side/label/camera'
+lidar_label_floder: 'source_format/cooperative-vehicle-infrastructure/infrastructure-side/label/virtuallidar'
+image_floder: 'source_format/cooperative-vehicle-infrastructure-infrastructure-side-image'
+velodyne_floder: 'source_format/cooperative-vehicle-infrastructure-infrastructure-side-velodyne'
+name_prefix: "c"
+
+random_seed: 2      #Set the random seed used to generate the splitting file for duplication and version control
+onlyFileName: True      #Option to generate file names or absolute paths
+train_set_proportion: 0
+validation_set_proportion: 0
+test_set_proportion: 1.0
+
+define_list_path_flag: True
+only image_list_flag: True
+image_list_define_path: training/image_2/
+image_label_list_path: training/label_fixed0716/
+combine_Tr_with_P2: False
+keep_kitti_format: False    #Fully converted in kitti format

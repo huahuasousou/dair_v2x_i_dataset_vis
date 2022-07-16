@@ -26,14 +26,17 @@ class DairDetectionDataset:
         
         
         if self.label_select=='cam':
-            self.label_path=os.path.join(self.root_path,"label_0410")
+            self.label_path=os.path.join(self.root_path,"label_2")
+        elif self.label_select=='label_fixed0716':
+            self.label_path=os.path.join(self.root_path,"label_fixed0716")            
         elif self.label_select=='vel':
             self.label_path=os.path.join(self.root_path,"label_velodyne")             
         elif self.label_select=='test':
-            self.label_path='/home/liuchenghua/Downloads/0428/data'
+            self.label_path='/home/liuchenghua/Downloads/0509/data'
         
    
-        self.calib_path=os.path.join(self.root_path,"calib_originP23X3")
+        self.calib_path=os.path.join(self.root_path,"calib")
+        #self.calib_path=os.path.join(self.root_path,"calib_originP23X3")
         self.velo_path = os.path.join(self.root_path,"velodyne")     
         self.image_path = os.path.join(self.root_path,"image_2")   
         self.label_name=".txt"
